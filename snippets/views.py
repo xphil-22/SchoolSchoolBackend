@@ -17,6 +17,7 @@ from rest_framework.permissions import IsAdminUser, IsAuthenticatedOrReadOnly, I
 from snippets.permissions import IsCreator, IsAdminOrCreator, SnippetListPermission
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from django.http import HttpResponseRedirect
+from rest_auth.views import LoginView
 # Create your views here.
 
 
@@ -32,9 +33,15 @@ class SnippetList(mixins.ListModelMixin,
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
 
-    @csrf_exempt
+
+
+    #@csrf_exempt
     def post(self, request, *args, **kwargs):
-        return self.create(request, *args, **kwargs)    #At create, return the SnippetList Detail
+        
+        return self.create(request, *args, **kwargs)    
+        #Extract id of the object using reverse()
+        #Edit user.SnippetID = id
+        #return the SnippetList Detail
 
     #def create(self, request, *args, **kwargs):
         #response = super(SnippetList, self).create(request, *args, **kwargs)
@@ -46,6 +53,10 @@ class SnippetList(mixins.ListModelMixin,
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
     
+    def update_profile(self, request, user_id):
+        user = User.objects.get(pk=user_id)
+        user.profile.SnippetID = 422
+        user.save()
 
 class SnippetDetail(mixins.RetrieveModelMixin,
                     mixins.UpdateModelMixin,
@@ -74,13 +85,22 @@ class SnippetDetail(mixins.RetrieveModelMixin,
 
 class UserList(generics.ListAPIView):
     permission_classes = [IsAdminUser]
+    authentication_classes = [SessionAuthentication]
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
 
 class UserDetail(generics.RetrieveAPIView):
     permission_classes = [IsAdminUser]
+    authentication_classes = [SessionAuthentication]
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
-    
+
+
+class CustomLoginView(LoginView):
+    def get_response(self):
+        orginal_response = super().get_response()
+        mydata = {"message": "some message", "status": "success"}
+        orginal_response.data.update(mydata)
+        return orginal_response

@@ -1,6 +1,11 @@
 from rest_framework import serializers
 from snippets.models import Snippet
 from django.contrib.auth.models import User
+from django.conf import settings
+
+from rest_framework import serializers
+from rest_auth.models import TokenModel
+from rest_auth.serializers import UserDetailsSerializer as DefaultUserDetailsSerializer
 
 class SnippetSerializer(serializers.ModelSerializer):
     owner = serializers.ReadOnlyField(source='owner.username')
@@ -16,5 +21,12 @@ class UserSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = User
-        fields = ['id', 'username', 'snippets']
+        fields = ['id', 'snippetID', 'username', 'snippets']
 
+
+class CustomTokenSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
+
+    class Meta:
+        model = TokenModel
+        fields = ('key', 'user', )
