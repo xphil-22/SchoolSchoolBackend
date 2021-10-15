@@ -21,12 +21,5 @@ class UserSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = User
-        fields = ['id', 'snippetID', 'username', 'snippets']
-
-
-class CustomTokenSerializer(serializers.ModelSerializer):
-    user = UserSerializer(read_only=True)
-
-    class Meta:
-        model = TokenModel
-        fields = ('key', 'user', )
+        fields = ['id', 'username', 'snippets']
+    

@@ -18,6 +18,7 @@ from snippets.permissions import IsCreator, IsAdminOrCreator, SnippetListPermiss
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from django.http import HttpResponseRedirect
 from rest_auth.views import LoginView
+import json
 # Create your views here.
 
 
@@ -37,7 +38,7 @@ class SnippetList(mixins.ListModelMixin,
 
     #@csrf_exempt
     def post(self, request, *args, **kwargs):
-        
+        #self.request.user.snippetID = 42
         return self.create(request, *args, **kwargs)    
         #Extract id of the object using reverse()
         #Edit user.SnippetID = id
@@ -101,6 +102,9 @@ class UserDetail(generics.RetrieveAPIView):
 class CustomLoginView(LoginView):
     def get_response(self):
         orginal_response = super().get_response()
-        mydata = {"message": "some message", "status": "success"}
+
+        mydata = {"SnippetID": ""}
         orginal_response.data.update(mydata)
         return orginal_response
+
+        
