@@ -18,7 +18,8 @@ from snippets.permissions import IsCreator, IsAdminOrCreator, SnippetListPermiss
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from django.http import HttpResponseRedirect
 from rest_auth.views import LoginView
-import json
+from django.core.exceptions import SuspiciousOperation
+from rest_framework.response import Response
 # Create your views here.
 
 
@@ -35,15 +36,43 @@ class SnippetList(mixins.ListModelMixin,
         return self.list(request, *args, **kwargs)
 
 
+    def post(self, request, format=None):
+        if not self.request.user.profile.snippetID:
+            serializer = SnippetSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save(owner=self.request.user)
+                self.request.user.profile.snippetID = serializer.data['id']
+                self.request.user.save() 
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response("invalid request, snippet already exists at snippets/{}".format(self.request.user.profile.snippetID), status=status.HTTP_403_FORBIDDEN)
+
+
 
     #@csrf_exempt
+    """
     def post(self, request, *args, **kwargs):
-        #self.request.user.snippetID = 42
-        return self.create(request, *args, **kwargs)    
+        if self.request.user.profile.snippetID:
+            newSnippet = self.create(request, *args, **kwargs)
+            #self.request.user.profile.snippetID = self.request.user.id #Change to actualSnippetId
+            #self.request.user.save() 
+
+            #return newSnippet
+            x = None
+            if SnippetSerializer.is_valid(self):
+                x = SnippetSerializer.save(self, owner=self.request.user)
+            raise SuspiciousOperation("Code :  {}".format())
+            #return Response(request.user.profile.snippetID)#
+        else:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+            
+        #raise SuspiciousOperation("invalid request, snippet already exist at: {}".format(self.request.user.profile.snippetID))
+
         #Extract id of the object using reverse()
         #Edit user.SnippetID = id
-        #return the SnippetList Detail
-
+        """
+        
     #def create(self, request, *args, **kwargs):
         #response = super(SnippetList, self).create(request, *args, **kwargs)
         # here may be placed additional operations for
@@ -53,15 +82,10 @@ class SnippetList(mixins.ListModelMixin,
     @csrf_exempt
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
-    
-    def update_profile(self, request, user_id):
-        user = User.objects.get(pk=user_id)
-        user.profile.SnippetID = 422
-        user.save()
 
 class SnippetDetail(mixins.RetrieveModelMixin,
                     mixins.UpdateModelMixin,
-                    mixins.DestroyModelMixin,
+                    #mixins.DestroyModelMixin,
                     generics.GenericAPIView):
                     
     
@@ -80,8 +104,8 @@ class SnippetDetail(mixins.RetrieveModelMixin,
     def put(self, request, *args, **kwargs):
         return self.update(request, *args, **kwargs)
 
-    def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
+    #def delete(self, request, *args, **kwargs):
+    #    return self.destroy(request, *args, **kwargs)
 
 
 class UserList(generics.ListAPIView):
@@ -102,9 +126,6 @@ class UserDetail(generics.RetrieveAPIView):
 class CustomLoginView(LoginView):
     def get_response(self):
         orginal_response = super().get_response()
-
-        mydata = {"SnippetID": ""}
+        mydata = {"SnippetID": self.request.user.profile.snippetID}
         orginal_response.data.update(mydata)
         return orginal_response
-
-        
