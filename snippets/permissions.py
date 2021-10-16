@@ -23,7 +23,7 @@ class IsCreator(permissions.BasePermission):
             
 
 SAFE_METHODS_SNIPPETLIST = [
-    'POST','HEAD', 'OPTIONS','GET'
+    'POST','HEAD', 'OPTIONS'
 ]
 
 class SnippetListPermission(permissions.BasePermission):
