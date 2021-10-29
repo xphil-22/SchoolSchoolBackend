@@ -20,6 +20,10 @@ from django.http import HttpResponseRedirect
 from rest_auth.views import LoginView
 from django.core.exceptions import SuspiciousOperation
 from rest_framework.response import Response
+from rest_framework.exceptions import APIException
+
+from snippets import untis
+import webuntis
 # Create your views here.
 
 
@@ -48,37 +52,6 @@ class SnippetList(mixins.ListModelMixin,
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         return Response("invalid request, snippet already exists at snippets/{}".format(self.request.user.profile.snippetID), status=status.HTTP_403_FORBIDDEN)
 
-
-
-    #@csrf_exempt
-    """
-    def post(self, request, *args, **kwargs):
-        if self.request.user.profile.snippetID:
-            newSnippet = self.create(request, *args, **kwargs)
-            #self.request.user.profile.snippetID = self.request.user.id #Change to actualSnippetId
-            #self.request.user.save() 
-
-            #return newSnippet
-            x = None
-            if SnippetSerializer.is_valid(self):
-                x = SnippetSerializer.save(self, owner=self.request.user)
-            raise SuspiciousOperation("Code :  {}".format())
-            #return Response(request.user.profile.snippetID)#
-        else:
-            return Response(status=status.HTTP_403_FORBIDDEN)
-            
-        #raise SuspiciousOperation("invalid request, snippet already exist at: {}".format(self.request.user.profile.snippetID))
-
-        #Extract id of the object using reverse()
-        #Edit user.SnippetID = id
-        """
-        
-    #def create(self, request, *args, **kwargs):
-        #response = super(SnippetList, self).create(request, *args, **kwargs)
-        # here may be placed additional operations for
-        # extracting id of the object and using reverse()
-        #red_url = "http://localhost:8000/snippets"+request
-        #return HttpResponseRedirect(redirect_to=red_url)
     @csrf_exempt
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
@@ -104,8 +77,6 @@ class SnippetDetail(mixins.RetrieveModelMixin,
     def put(self, request, *args, **kwargs):
         return self.update(request, *args, **kwargs)
 
-    #def delete(self, request, *args, **kwargs):
-    #    return self.destroy(request, *args, **kwargs)
 
 
 class UserList(generics.ListAPIView):
@@ -122,10 +93,49 @@ class UserDetail(generics.RetrieveAPIView):
     serializer_class = UserSerializer
 
 
-
 class CustomLoginView(LoginView):
     def get_response(self):
         orginal_response = super().get_response()
         mydata = {"SnippetID": self.request.user.profile.snippetID}
         orginal_response.data.update(mydata)
         return orginal_response
+
+
+"""
+class WebUntis(APIView):
+
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication, SessionAuthentication]
+
+    def get(self, request, format=None):
+        return Response()
+
+    def post(self, request, format=None):
+        #Raw_Data = request.data
+        #untisUsername = Raw_Data['username']
+        #untisPassword = Raw_Data['password']
+        self.request.user.profile.untisUsername = "123456"
+        self.request.user.save() 
+
+        return Response(self.request.user.profile.untisUsername)
+"""
+
+class WebUntisRegistration(APIView):
+    authentication_classes = [TokenAuthentication, SessionAuthentication]
+    permission_classes = [IsAuthenticated] 
+
+    def post(self, request, format=None):
+        Raw_Data = request.data
+        if (Raw_Data['username'] and Raw_Data['password']) != None:
+            u = untis.Untis()
+            if u.newSession(Raw_Data['username'], Raw_Data['password']):  
+                self.request.user.profile.untisUsername = Raw_Data['username'] 
+                self.request.user.profile.untisPassword = Raw_Data['password']
+                self.request.user.save()               
+                return Response(status=status.HTTP_200_OK)
+            else:
+                 raise APIException("Wrong credentials")
+           
+           
+           
+           # server/WebUntis/registration #Body -> {"username":"value", "password":"value"}
