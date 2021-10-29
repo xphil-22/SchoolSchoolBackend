@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from snippets.models import Snippet
+from snippets.models import Snippet, Untis
 from django.contrib.auth.models import User
 from django.conf import settings
 
@@ -22,4 +22,8 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'snippets']
-    
+
+class UntisSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Snippet
+        fields = ['id', 'owner', "data"]
