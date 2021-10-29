@@ -1,7 +1,8 @@
 from django.urls import path
 from rest_framework.urlpatterns import format_suffix_patterns
 from snippets import views
-from snippets.views import CustomLoginView, WebUntis
+from snippets.views import CustomLoginView
+#, WebUntis
 from django.urls import path, include
 
 urlpatterns = [
@@ -16,7 +17,7 @@ urlpatterns = [
     path('login/', CustomLoginView.as_view(), name='my_custom_login'),
     path('registration/', include('rest_auth.registration.urls')),
 
-    path('webuntis/', views.WebUntis.as_view()),
+    #path('webuntis/', views.WebUntis.as_view()),
     path('webuntis/registration/', views.WebUntisRegistration.as_view()),
     #path('webuntis/', webuntisview.untis.as_view(), name='untis'),
 ]
