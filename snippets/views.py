@@ -121,7 +121,7 @@ class WebUntis(APIView):
         return Response(self.request.user.profile.untisUsername)
 """
 
-class WebUntisRegistration(APIView):
+class WebUntisLogin(APIView):
     authentication_classes = [TokenAuthentication, SessionAuthentication]
     permission_classes = [IsAuthenticated] 
 
@@ -139,7 +139,7 @@ class WebUntisRegistration(APIView):
            
            
            
-           # server/WebUntis/registration #Body -> {"username":"value", "password":"value"}
+           # server/WebUntis/Login #Body -> {"username":"value", "password":"value"}
 
 
 def webuntis(request):
