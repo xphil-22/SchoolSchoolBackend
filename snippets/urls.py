@@ -17,9 +17,10 @@ urlpatterns = [
     path('login/', CustomLoginView.as_view(), name='my_custom_login'),
     path('registration/', include('rest_auth.registration.urls')),
 
-    #path('webuntis/', views.WebUntis.as_view()),
-    path('webuntis/registration/', views.WebUntisRegistration.as_view()),
-    #path('webuntis/', webuntisview.untis.as_view(), name='untis'),
+    path('webuntis/registration/', views.WebUntisRegistration.as_view()),  
+    
+    
+    path('webuntis/',views.webuntis)
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

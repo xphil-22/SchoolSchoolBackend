@@ -13,7 +13,7 @@ s = webuntis.Session(
 
 
 klassenID = s.klassen().filter(name='TGI12/4')[0].id
-
+"""
 today = datetime.date.today()
 monday = today - datetime.timedelta(days=today.weekday())
 friday = monday + datetime.timedelta(days=4)
@@ -26,7 +26,8 @@ if today.weekday() >= 5:
 
 print(TodayOrNextSchoolDay)
 
-klasse = s.klassen().filter(id=klassenID)[0]  
+klasse = s.klassen().filter(id=klassenID)[0]
+"""
 #NextWeek = datetime.date(2021, , 01)
 #print(NextWeek)
 #tt = s.timetable(klasse=klasse, start=NextWeek, end=NextWeek)
@@ -37,3 +38,13 @@ klasse = s.klassen().filter(id=klassenID)[0]
 a = s.klassen()
 print(a)
 """
+
+#print(s.)
+today = datetime.date.today()
+monday = today - datetime.timedelta(days=today.weekday())
+friday = monday + datetime.timedelta(days=4)
+
+klasse = s.klassen().filter(name="TGI12/4")[0]  # schoolclass #1
+tt = s.timetable(klasse=klasse, start=monday, end=friday)
+
+print(tt)

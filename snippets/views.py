@@ -13,7 +13,7 @@ from rest_framework import mixins
 from rest_framework import generics
 from django.contrib.auth.models import User
 from snippets.serializers import UserSerializer
-from rest_framework.permissions import IsAdminUser, IsAuthenticatedOrReadOnly, IsAuthenticated
+from rest_framework.permissions import IsAdminUser, IsAuthenticatedOrReadOnly, IsAuthenticated, AllowAny
 from snippets.permissions import IsCreator, IsAdminOrCreator, SnippetListPermission
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from django.http import HttpResponseRedirect
@@ -21,7 +21,8 @@ from rest_auth.views import LoginView
 from django.core.exceptions import SuspiciousOperation
 from rest_framework.response import Response
 from rest_framework.exceptions import APIException
-
+from rest_framework.decorators import api_view, permission_classes
+import json
 from snippets import untis
 import webuntis
 # Create your views here.
@@ -139,3 +140,61 @@ class WebUntisRegistration(APIView):
            
            
            # server/WebUntis/registration #Body -> {"username":"value", "password":"value"}
+
+
+def webuntis(request):
+    authentication_classes = [TokenAuthentication, SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    
+    try:
+        username = request.user.profile.untisUsername
+        password = request.user.profile.untisPassword
+    except:
+        return HttpResponse("You have to Login first")
+     
+    if request.GET.get('classes') == 'all':
+        u = untis.Untis()
+        loggedIn = u.newSession(username, password)
+        
+        if loggedIn:
+            klassen = u.getClasses()
+            arr = []
+            for klasse in klassen:
+                arr.append(klasse.name)  
+            return HttpResponse(" ".join(arr))
+        else:
+            return HttpResponse("Wrong Webuntis credentials in Database, maybe you have to change your Login Data via: 'webuntis/changeLoginData'")
+     
+    elif request.GET.get('ClassSubjectsOf'):
+        u = untis.Untis()
+        loggedIn = u.newSession(username, password)
+        if loggedIn:
+            tt = u.getSubjects(request.GET.get('ClassSubjectsOf'))
+            return HttpResponse(tt)
+        else:
+            return HttpResponse("Wrong Webuntis credentials in Database, maybe you have to change your Login Data via: 'webuntis/changeLoginData'")
+    
+    return HttpResponse("Wrong Keyword") 
+    #if slug == "classes":
+    #    u = untis.Untis()
+    #    u.newSession(username, password)
+    #    klassen = u.getClasses()
+    #    
+    #    arr = []
+    #    for klasse in klassen:
+    #        arr.append(klasse.name)  
+    #    return HttpResponse(" ".join(arr))
+#
+    #elif slug[0:8] == "subjects":
+    #    
+    #    u = untis.Untis()
+    #    u.newSession(username, password)
+    #    subjects = u.getSubjects(slug[0:8])
+    #    return HttpResponse(subjects)
+    #    
+    #
+    #else:
+    #    #return HttpResponse(slug[0:8])
+    #    
+    #
