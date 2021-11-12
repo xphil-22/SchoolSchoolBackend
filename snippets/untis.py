@@ -30,7 +30,8 @@ class Untis:
         today = datetime.date.today()
         monday = today - datetime.timedelta(days=today.weekday())
         friday = monday + datetime.timedelta(days=6)
-
+        print("monday ",monday)
+        print("friday",friday)
         klasse = self._session.klassen().filter(name=className)[0]  
         tt = self._session.timetable(klasse=klasse, start=monday, end=friday)
         
@@ -41,12 +42,9 @@ class Untis:
 
         ID_List = list(set(ID_List)) #To clear the array from duplicates
             
-        subject_list = [subject for subject in self._session.subjects()
+        subject_list = [str(subject) for subject in self._session.subjects()
                         if subject.id in ID_List]
         
-        subject_list_pretty = []
-        for sub in subject_list:
-            subject_list_pretty.append(str(sub)+" ")
         
-        return subject_list_pretty
+        return subject_list
     

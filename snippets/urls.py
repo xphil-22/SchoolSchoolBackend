@@ -17,7 +17,8 @@ urlpatterns = [
     path('login/', CustomLoginView.as_view(), name='my_custom_login'),
     path('registration/', include('rest_auth.registration.urls')),
 
-    path('webuntis/login/', views.WebUntisLogin.as_view()),  
+    path('webuntis/login/', views.WebUntisLogin.as_view()),
+    path('webuntis/changeLoginData/', views.changeLoginData.as_view()), 
     path('webuntis/',views.webuntis)
 ]
 
