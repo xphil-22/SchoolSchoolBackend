@@ -77,7 +77,6 @@ class WebsiteUntis:
         self._options.add_argument("--headless")
         self._options.add_argument("--no-sandbox")
         self._options.add_argument("--disable-dev-sh-usage")
-        self._options.add_argument("--start-maximized")  ##
         prefs = {"profile.default_content_settings.popups": 0,
              "download.default_directory": 
                         os.getcwd() + "\Ical_Files", #Current Directory
@@ -101,7 +100,7 @@ class WebsiteUntis:
     
     def downloadIcal(self):
         driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), chrome_options=self._options)
-
+        #driver = webdriver.Chrome(chrome_options=self._options)
         driver.get("https://terpsichore.webuntis.com/WebUntis/?school=RFGS-Freiburg#/basic/login")
         input_fields = driver.find_elements(By.CLASS_NAME, 'un-input-group__input')
         input_fields[0].send_keys(self._username)
