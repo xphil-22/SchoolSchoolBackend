@@ -24,7 +24,7 @@ from rest_framework.exceptions import APIException
 from rest_framework.decorators import api_view, permission_classes
 import json
 from snippets import untis
-import webuntis
+
 # Create your views here.
 
 
@@ -102,25 +102,6 @@ class CustomLoginView(LoginView):
         return orginal_response
 
 
-"""
-class WebUntis(APIView):
-
-    permission_classes = [IsAuthenticated]
-    authentication_classes = [TokenAuthentication, SessionAuthentication]
-
-    def get(self, request, format=None):
-        return Response()
-
-    def post(self, request, format=None):
-        #Raw_Data = request.data
-        #untisUsername = Raw_Data['username']
-        #untisPassword = Raw_Data['password']
-        self.request.user.profile.untisUsername = "123456"
-        self.request.user.save() 
-
-        return Response(self.request.user.profile.untisUsername)
-"""
-
 class WebUntisLogin(APIView):
     authentication_classes = [TokenAuthentication, SessionAuthentication]
     permission_classes = [IsAuthenticated] 
@@ -166,6 +147,14 @@ def webuntis(request):
         password = request.user.profile.untisPassword
     except:
         return HttpResponse("You have to Login first")
+     
+    if request.GET.get('subjects') == "":
+        u = untis.Untis()
+        loggedIn = u.newSession(username, password)
+        if loggedIn:
+            web = untis.WebsiteUntis(username, password)
+            return JsonResponse(web.getWebSubjects(), safe=False)
+
      
     if request.GET.get('classes') == 'all':
         u = untis.Untis()
