@@ -24,7 +24,7 @@ from rest_framework.exceptions import APIException
 from rest_framework.decorators import api_view, permission_classes
 import json
 from snippets import untis
-import webuntis
+
 # Create your views here.
 
 
@@ -102,26 +102,7 @@ class CustomLoginView(LoginView):
         return orginal_response
 
 
-"""
-class WebUntis(APIView):
-
-    permission_classes = [IsAuthenticated]
-    authentication_classes = [TokenAuthentication, SessionAuthentication]
-
-    def get(self, request, format=None):
-        return Response()
-
-    def post(self, request, format=None):
-        #Raw_Data = request.data
-        #untisUsername = Raw_Data['username']
-        #untisPassword = Raw_Data['password']
-        self.request.user.profile.untisUsername = "123456"
-        self.request.user.save() 
-
-        return Response(self.request.user.profile.untisUsername)
-"""
-
-class WebUntisRegistration(APIView):
+class WebUntisLogin(APIView):
     authentication_classes = [TokenAuthentication, SessionAuthentication]
     permission_classes = [IsAuthenticated] 
 
@@ -139,8 +120,22 @@ class WebUntisRegistration(APIView):
            
            
            
-           # server/WebUntis/registration #Body -> {"username":"value", "password":"value"}
+           # server/WebUntis/Login #Body -> {"username":"value", "password":"value"}
+class changeLoginData(APIView):
+    authentication_classes = [TokenAuthentication, SessionAuthentication]
+    permission_classes = [IsAuthenticated] 
 
+    def post(self, request, format=None):
+        Raw_Data = request.data
+        if (Raw_Data['username'] and Raw_Data['password']) != None:
+            u = untis.Untis()
+            if u.newSession(Raw_Data['username'], Raw_Data['password']):  
+                self.request.user.profile.untisUsername = Raw_Data['username'] 
+                self.request.user.profile.untisPassword = Raw_Data['password']
+                self.request.user.save()               
+                return Response(status=status.HTTP_200_OK)
+            else:
+                 raise APIException("Wrong credentials")
 
 def webuntis(request):
     authentication_classes = [TokenAuthentication, SessionAuthentication]
@@ -153,6 +148,14 @@ def webuntis(request):
     except:
         return HttpResponse("You have to Login first")
      
+    if request.GET.get('subjects') == "":
+        u = untis.Untis()
+        loggedIn = u.newSession(username, password)
+        if loggedIn:
+            web = untis.WebsiteUntis(username, password)
+            return JsonResponse(web.getWebSubjects(), safe=False)
+
+     
     if request.GET.get('classes') == 'all':
         u = untis.Untis()
         loggedIn = u.newSession(username, password)
@@ -162,7 +165,7 @@ def webuntis(request):
             arr = []
             for klasse in klassen:
                 arr.append(klasse.name)  
-            return HttpResponse(" ".join(arr))
+            return JsonResponse(arr, safe=False)
         else:
             return HttpResponse("Wrong Webuntis credentials in Database, maybe you have to change your Login Data via: 'webuntis/changeLoginData'")
      
@@ -170,8 +173,8 @@ def webuntis(request):
         u = untis.Untis()
         loggedIn = u.newSession(username, password)
         if loggedIn:
-            tt = u.getSubjects(request.GET.get('ClassSubjectsOf'))
-            return HttpResponse(tt)
+            subs = u.getSubjects(request.GET.get('ClassSubjectsOf'))
+            return JsonResponse(subs, safe=False)
         else:
             return HttpResponse("Wrong Webuntis credentials in Database, maybe you have to change your Login Data via: 'webuntis/changeLoginData'")
     
