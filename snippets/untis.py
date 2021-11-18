@@ -74,9 +74,15 @@ class WebsiteUntis:
         
         self._options = webdriver.ChromeOptions()
         self._options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
+<<<<<<< HEAD
         #self._options.add_argument("--headless")
         #self._options.add_argument("--no-sandbox")
         #self._options.add_argument("--disable-dev-sh-usage")
+=======
+        self._options.add_argument("--headless")
+        self._options.add_argument("--no-sandbox")
+        self._options.add_argument("--disable-dev-sh-usage")
+>>>>>>> 5ec88786d1b1afb6b5d6d516a07cf176a81d8a3e
         prefs = {"profile.default_content_settings.popups": 0,
              "download.default_directory": 
                         os.getcwd() + "\Ical_Files", #Current Directory
@@ -99,8 +105,13 @@ class WebsiteUntis:
         
     
     def downloadIcal(self):
+<<<<<<< HEAD
         #driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), chrome_options=self._options)
         driver = webdriver.Chrome(chrome_options=self._options)
+=======
+        driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), chrome_options=self._options)
+        #driver = webdriver.Chrome(chrome_options=self._options)
+>>>>>>> 5ec88786d1b1afb6b5d6d516a07cf176a81d8a3e
         driver.get("https://terpsichore.webuntis.com/WebUntis/?school=RFGS-Freiburg#/basic/login")
         input_fields = driver.find_elements(By.CLASS_NAME, 'un-input-group__input')
         input_fields[0].send_keys(self._username)
