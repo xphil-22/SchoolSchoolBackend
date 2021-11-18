@@ -82,6 +82,9 @@ class WebsiteUntis:
         self._options.add_argument("--headless")
         self._options.add_argument("--no-sandbox")
         self._options.add_argument("--disable-dev-sh-usage")
+<<<<<<< HEAD
+>>>>>>> 5ec88786d1b1afb6b5d6d516a07cf176a81d8a3e
+=======
 >>>>>>> 5ec88786d1b1afb6b5d6d516a07cf176a81d8a3e
         prefs = {"profile.default_content_settings.popups": 0,
              "download.default_directory": 
@@ -111,6 +114,9 @@ class WebsiteUntis:
 =======
         driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), chrome_options=self._options)
         #driver = webdriver.Chrome(chrome_options=self._options)
+<<<<<<< HEAD
+>>>>>>> 5ec88786d1b1afb6b5d6d516a07cf176a81d8a3e
+=======
 >>>>>>> 5ec88786d1b1afb6b5d6d516a07cf176a81d8a3e
         driver.get("https://terpsichore.webuntis.com/WebUntis/?school=RFGS-Freiburg#/basic/login")
         input_fields = driver.find_elements(By.CLASS_NAME, 'un-input-group__input')
