@@ -140,11 +140,13 @@ class changeLoginData(APIView):
 def webuntis(request):
     authentication_classes = [TokenAuthentication, SessionAuthentication]
     permission_classes = [IsAuthenticated]
-
     
-
-    username = request.user.profile.untisUsername
-    password = request.user.profile.untisPassword
+    try:
+        username = request.user.profile.untisUsername
+        password = request.user.profile.untisPassword
+        
+    except:
+        return HttpResponse("You have to Login first")
     
     if username == "" or password == "":
         return HttpResponse("You have to Login first")

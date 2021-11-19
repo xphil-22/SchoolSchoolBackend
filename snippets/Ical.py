@@ -22,7 +22,8 @@ class Ical:
                 a = arr[i][arr[i].find(':')+1:]
                 b = a.split(' ')
                 c = b[-2]
-                
-                SubjectData.append({ arr[i+1][arr[i+1].find(':')+1:] : c})
+                element = [arr[i+1][arr[i+1].find(':')+1:] , c] 
+                if element not in SubjectData:
+                    SubjectData.append(element)               
         return SubjectData
     
