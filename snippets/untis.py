@@ -101,6 +101,8 @@ class WebsiteUntis:
     def downloadIcal(self):
         #driver = webdriver.Chrome(chrome_options=self._options)
         driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), chrome_options=self._options)
+        driver.set_window_position(0, 0)
+        driver.set_window_size(1902, 768)
         
         driver.get("https://terpsichore.webuntis.com/WebUntis/?school=RFGS-Freiburg#/basic/login")
         input_fields = driver.find_elements(By.CLASS_NAME, 'un-input-group__input')
@@ -115,8 +117,11 @@ class WebsiteUntis:
         WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, 'embedded-webuntis')))
         driver.switch_to.frame('embedded-webuntis')
 
+        time.sleep(0.001)
         ical_Download_Button = WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.XPATH, '//*[@id="dijit_layout__LayoutWidget_0"]/section/div/div/div[1]/div/form/div[2]/button[1]'))) 
+        time.sleep(0.001)
         ical_Download_Button.click()
+        time.sleep(0.001)
         
         while os.path.exists(self._filePath) == False:
             time.sleep(0.001)
