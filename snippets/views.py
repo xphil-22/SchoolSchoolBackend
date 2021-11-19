@@ -142,10 +142,11 @@ def webuntis(request):
     permission_classes = [IsAuthenticated]
 
     
-    try:
-        username = request.user.profile.untisUsername
-        password = request.user.profile.untisPassword
-    except:
+
+    username = request.user.profile.untisUsername
+    password = request.user.profile.untisPassword
+    
+    if username == "" or password == "":
         return HttpResponse("You have to Login first")
      
     if request.GET.get('subjects') == "":
