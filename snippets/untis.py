@@ -117,7 +117,7 @@ class WebsiteUntis:
         WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, 'embedded-webuntis')))
         driver.switch_to.frame('embedded-webuntis')
 
-        time.sleep(10)
+        time.sleep(3)
         ical_Download_Button = WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.XPATH, '//*[@id="dijit_layout__LayoutWidget_0"]/section/div/div/div[1]/div/form/div[2]/button[1]'))) 
         time.sleep(0.001)
         ical_Download_Button.click()
