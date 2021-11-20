@@ -115,7 +115,7 @@ class WebsiteUntis:
         
         elements = driver.find_elements(By.TAG_NAME, 'button')
         for i in elements:
-            print(i+"\n")
+            print(str(i)+"\n")
         
         WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, 'embedded-webuntis')))
         driver.switch_to.frame('embedded-webuntis')
