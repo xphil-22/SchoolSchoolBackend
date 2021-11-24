@@ -86,9 +86,9 @@ class WebsiteUntis:
         
     def getWebSubjects(self):        
         self._setFilePath()
-        self.downloadIcal()
-        self._ical = Ical.Ical(self._filePath)
-        return self._ical.getSubjectData()
+        return self.downloadIcal()
+        #self._ical = Ical.Ical(self._filePath)
+        #return self._ical.getSubjectData()
         
     def _setFilePath(self):
         name = self._username.replace('ss','ß').split('.')
