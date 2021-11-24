@@ -123,6 +123,7 @@ class WebsiteUntis:
        
         try:
             ical_Download_Button = WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.XPATH, "//*[@id='content']")))
+            return str(ical_Download_Button)
         except:       
             return "False"
         
