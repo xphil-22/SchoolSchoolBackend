@@ -122,7 +122,7 @@ class WebsiteUntis:
 
        
         try:
-            ical_Download_Button = WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.XPATH, "//*[@id='dijit_layout__LayoutWidget_0']/section/div/div/div[1]/div/form")))
+            ical_Download_Button = WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.XPATH, "//*[@id='dijit_layout__LayoutWidget_0']/section/div/div/div[1]")))
             return str(ical_Download_Button)
         except:       
             return "False"
