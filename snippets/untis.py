@@ -18,7 +18,7 @@ import os
 #
 import requests
 from rq import Queue
-from worker import conn
+from snippets.worker import conn
 #
 
 class Untis:
