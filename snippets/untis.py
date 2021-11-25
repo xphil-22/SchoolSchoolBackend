@@ -86,9 +86,9 @@ class WebsiteUntis:
         
     def getWebSubjects(self):        
         self._setFilePath()
-        return self.downloadIcal()
-        #self._ical = Ical.Ical(self._filePath)
-        #return self._ical.getSubjectData()
+        self.downloadIcal()
+        self._ical = Ical.Ical(self._filePath)
+        return self._ical.getSubjectData()
         
     def _setFilePath(self):
         name = self._username.replace('ss','ß').split('.')
@@ -121,19 +121,10 @@ class WebsiteUntis:
         driver.switch_to.frame('embedded-webuntis')
 
        
-        try:
-            sel = '#dijit_layout__LayoutWidget_0 > section > div > div > div.un-flex-pane.un-flex-pane--fixed.un-timetable-page__header > div > form > div.float-right.btn-group > button:nth-child(1)'
-            ical_Download_Button = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel)))
-            return str(ical_Download_Button)
-        except:       
-            return str(driver.page_source)
+        sel = '#dijit_layout__LayoutWidget_0 > section > div > div > div.un-flex-pane.un-flex-pane--fixed.un-timetable-page__header > div > form > div.float-right.btn-group > button:nth-child(1)'
+        ical_Download_Button = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel)))
         
-        return str(driver.page_source)
-        print(len(driver.find_elements(By.TAG_NAME, 'button')))
-        ical_Download_Button = WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.XPATH, '//*[@id="dijit_layout__LayoutWidget_0"]/section/div/div/div[1]/div/form/div[2]/button[1]'))) 
-        time.sleep(0.001)
         ical_Download_Button.click()
-        time.sleep(0.001)
         
         while os.path.exists(self._filePath) == False:
             time.sleep(0.001)
