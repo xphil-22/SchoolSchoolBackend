@@ -86,9 +86,9 @@ class WebsiteUntis:
         
     def getWebSubjects(self):        
         self._setFilePath()
-        self.downloadIcal()
-        self._ical = Ical.Ical(self._filePath)
-        return self._ical.getSubjectData()
+        return self.downloadIcal()
+        #self._ical = Ical.Ical(self._filePath)
+        #return self._ical.getSubjectData()
         
     def _setFilePath(self):
         name = self._username.replace('ss','ß').split('.')
@@ -125,7 +125,7 @@ class WebsiteUntis:
         ical_Download_Button = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel)))
         
         ical_Download_Button.click()
-        
+        return "True!!!!!"
         while os.path.exists(self._filePath) == False:
             time.sleep(0.001)
         
