@@ -15,6 +15,11 @@ from selenium.webdriver.chrome.options import Options
 
 from snippets import Ical
 import os
+#
+import requests
+from rq import Queue
+from worker import conn
+#
 
 class Untis:
     def __init__(self):
@@ -86,7 +91,9 @@ class WebsiteUntis:
         
     def getWebSubjects(self):        
         self._setFilePath()
-        return self.downloadIcal()
+        q = Queue(connection=conn)
+        result = q.enqueue(self.downloadIcal())
+        return "Juhu"
         #self._ical = Ical.Ical(self._filePath)
         #return self._ical.getSubjectData()
         
