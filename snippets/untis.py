@@ -122,8 +122,6 @@ class WebsiteUntis:
 
        
         try:
-            driver.refresh()
-            time.sleep(5)
             sel = '#dijit_layout__LayoutWidget_0 > section > div > div > div.un-flex-pane.un-flex-pane--fixed.un-timetable-page__header > div > form > div.float-right.btn-group > button:nth-child(1)'
             ical_Download_Button = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel)))
             return str(ical_Download_Button)
