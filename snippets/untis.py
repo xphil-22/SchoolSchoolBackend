@@ -69,6 +69,7 @@ class Untis:
 class WebsiteUntis:
     
     AsyncData = []
+    AsyncProcesses = []
     
     def __init__(self, username, password):
         self._ical = 0
@@ -89,16 +90,25 @@ class WebsiteUntis:
         
         
     def getWebSubjects(self):
-        if self.proofAsyncData == False:
-            print("1")
+        if self.proofAsyncData() == False and [self._username, self._password] not in WebsiteUntis.AsyncProcesses: 
             self._setFilePath()
+            WebsiteUntis.AsyncProcesses.append(f"{self._username}{self._password}")
             p1 = Process(target=self.downloadIcal)
             p1.start()
+            return "Collecting startet, please wait..."
+        
+        elif f"{self._username}{self._password}" in WebsiteUntis.AsyncProcesses:
             return "Collecting data, please wait..."
+        
+        else:    
+            return WebsiteUntis.AsyncData[f"{self._username}{self._password}"]
+    
+    def proofAsyncData(self):
+        for el in WebsiteUntis.AsyncData:
+            if f"{self._username}{self._password}" in el:
+                return el[f"{self._username}{self._password}"]
         else:
-            return str(self.proofAsyncData)
-        
-        
+            return False
     
     def runInParallel(*fns):
         proc = []
@@ -115,15 +125,9 @@ class WebsiteUntis:
         self._filePath = f"Ical_Files\{fileName}.ics"
         if os.path.exists(self._filePath):
             os.remove(self._filePath)
-    
-    def proofAsyncData(username, password):
-        print(WebsiteUntis.AsyncData)
-        if f"{username}{password}" in WebsiteUntis.AsyncData != None:
-            return WebsiteUntis.AsyncData[f"{username}{password}"]
-        else:
-            False
             
     def downloadIcal(self):
+        print(WebsiteUntis.AsyncProcesses)
         driver = webdriver.Chrome(chrome_options=self._options)
         #driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), chrome_options=self._options)
         driver.set_window_position(0, 0)
@@ -138,10 +142,6 @@ class WebsiteUntis:
         tt = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="root"]/div/div/div[2]/div[1]/div/a[5]/div/div/div[2]')))
         tt.click()
         
-        elements = driver.find_elements(By.TAG_NAME, 'button')
-        for i in elements:
-            print(str(i)+"\n")
-        
         WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, 'embedded-webuntis')))
         driver.switch_to.frame('embedded-webuntis')
 
@@ -155,6 +155,6 @@ class WebsiteUntis:
             
         self._ical = Ical.Ical(self._filePath)
         data = self._ical.getSubjectData()
-        WebsiteUntis.AsyncData.append({ f"{self._username}{self.password}" : data})
+        WebsiteUntis.AsyncData.append({f"{self._username}{self._password}" : data})
         print(data)
-        
+        WebsiteUntis.AsyncProcesses.remove(f"{self._username}{self._password}")
