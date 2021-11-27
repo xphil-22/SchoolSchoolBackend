@@ -17,7 +17,7 @@ from snippets import Ical
 import os
 
 from multiprocessing import Process
-
+from snippets import Async
 class Untis:
     def __init__(self):
         self._session = 0
@@ -66,16 +66,17 @@ class Untis:
     
     
     "SELENIUM STUFF STARTS HERE"
+
+
+
 class WebsiteUntis:
-    
-    AsyncData = []
-    AsyncProcesses = []
     
     def __init__(self, username, password):
         self._ical = 0
         self._username = username
         self._password = password
         self._filePath = ""
+        self._Async = Async.Async()
         
         self._options = webdriver.ChromeOptions()
         self._options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
@@ -88,23 +89,24 @@ class WebsiteUntis:
              "directory_upgrade": True}
         self._options.add_experimental_option("prefs", prefs)
         
-        
     def getWebSubjects(self):
-        if self.proofAsyncData() == False and [self._username, self._password] not in WebsiteUntis.AsyncProcesses: 
+        if self.proofAsyncData() == False and [self._username, self._password] not in self._Async.getData(): 
             self._setFilePath()
-            WebsiteUntis.AsyncProcesses.append(f"{self._username}{self._password}")
+            self._Async.addProcess(f"{self._username}{self._password}")
+            
+            self.downloadIcal()
             p1 = Process(target=self.downloadIcal)
             p1.start()
             return "Collecting startet, please wait..."
         
-        elif f"{self._username}{self._password}" in WebsiteUntis.AsyncProcesses:
+        elif f"{self._username}{self._password}" in self._Async.getProcesses():
             return "Collecting data, please wait..."
         
         else:    
-            return WebsiteUntis.AsyncData[f"{self._username}{self._password}"]
+            return self._Async.getData[f"{self._username}{self._password}"]
     
     def proofAsyncData(self):
-        for el in WebsiteUntis.AsyncData:
+        for el in self._Async.getData():
             if f"{self._username}{self._password}" in el:
                 return el[f"{self._username}{self._password}"]
         else:
@@ -127,7 +129,7 @@ class WebsiteUntis:
             os.remove(self._filePath)
             
     def downloadIcal(self):
-        print(WebsiteUntis.AsyncProcesses)
+        print("download Ical:" , self._Async.getData())
         driver = webdriver.Chrome(chrome_options=self._options)
         #driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), chrome_options=self._options)
         driver.set_window_position(0, 0)
@@ -155,6 +157,9 @@ class WebsiteUntis:
             
         self._ical = Ical.Ical(self._filePath)
         data = self._ical.getSubjectData()
-        WebsiteUntis.AsyncData.append({f"{self._username}{self._password}" : data})
+        self._Async.addData({f"{self._username}{self._password}" : data})
         print(data)
-        WebsiteUntis.AsyncProcesses.remove(f"{self._username}{self._password}")
+        self._Async.removeProcess(f"{self._username}{self._password}")
+
+
+
