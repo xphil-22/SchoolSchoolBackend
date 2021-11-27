@@ -1,4 +1,3 @@
-
 from django.core.files import File
 
 class Ical:
