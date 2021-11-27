@@ -15,11 +15,8 @@ from selenium.webdriver.chrome.options import Options
 
 from snippets import Ical
 import os
-#
-import requests
-from rq import Queue
-from snippets.worker import conn
-#
+
+from multiprocessing import Process
 
 class Untis:
     def __init__(self):
@@ -71,6 +68,8 @@ class Untis:
     "SELENIUM STUFF STARTS HERE"
 class WebsiteUntis:
     
+    AsyncData = []
+    
     def __init__(self, username, password):
         self._ical = 0
         self._username = username
@@ -89,25 +88,44 @@ class WebsiteUntis:
         self._options.add_experimental_option("prefs", prefs)
         
         
-    def getWebSubjects(self):        
-        self._setFilePath()
-        q = Queue(connection=conn)
-        result = q.enqueue(self.downloadIcal())
-        return "Juhu"
-        #self._ical = Ical.Ical(self._filePath)
-        #return self._ical.getSubjectData()
+    def getWebSubjects(self):
+        if self.proofAsyncData == False:
+            print("1")
+            self._setFilePath()
+            p1 = Process(target=self.downloadIcal)
+            p1.start()
+            return "Collecting data, please wait..."
+        else:
+            return str(self.proofAsyncData)
         
+        
+    
+    def runInParallel(*fns):
+        proc = []
+        for fn in fns:
+            p = Process(target=fn)
+            p.start()
+            proc.append(p)
+        for p in proc:
+            p.join()
+    
     def _setFilePath(self):
         name = self._username.replace('ss','ß').split('.')
         fileName = name[1][0:6].capitalize() + name[0][0:3].capitalize()
         self._filePath = f"Ical_Files\{fileName}.ics"
         if os.path.exists(self._filePath):
             os.remove(self._filePath)
-        
     
+    def proofAsyncData(username, password):
+        print(WebsiteUntis.AsyncData)
+        if f"{username}{password}" in WebsiteUntis.AsyncData != None:
+            return WebsiteUntis.AsyncData[f"{username}{password}"]
+        else:
+            False
+            
     def downloadIcal(self):
-        #driver = webdriver.Chrome(chrome_options=self._options)
-        driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), chrome_options=self._options)
+        driver = webdriver.Chrome(chrome_options=self._options)
+        #driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), chrome_options=self._options)
         driver.set_window_position(0, 0)
         driver.set_window_size(1902, 768)
         
@@ -132,11 +150,11 @@ class WebsiteUntis:
         ical_Download_Button = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel)))
         
         ical_Download_Button.click()
-        
-        return str(self._filePath)
-        
-        """
         while os.path.exists(self._filePath) == False:
             time.sleep(0.001)
-        """
+            
+        self._ical = Ical.Ical(self._filePath)
+        data = self._ical.getSubjectData()
+        WebsiteUntis.AsyncData.append({ f"{self._username}{self.password}" : data})
+        print(data)
         
