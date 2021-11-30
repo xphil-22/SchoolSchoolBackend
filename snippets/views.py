@@ -157,8 +157,10 @@ def webuntis(request):
         if loggedIn:
             web = untis.WebsiteUntis(username, password)
             return JsonResponse(web.getWebSubjects(), safe=False)
+        else:
+            return HttpResponse("Wrong Webuntis credentials in Database, maybe you have to change your Login Data via: 'webuntis/changeLoginData'")
+    
 
-     
     if request.GET.get('classes') == 'all':
         u = untis.Untis()
         loggedIn = u.newSession(username, password)
