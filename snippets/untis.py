@@ -4,7 +4,7 @@ import datetime
 import json
 import ast
 import time
-
+import json
 #SELENIUM IMPORTS
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -85,11 +85,11 @@ class WebsiteUntis:
         self._options = webdriver.ChromeOptions()
         self._options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
         self._options.add_argument("--no-sandbox")
-        #self._options.add_argument("--headless")
+        self._options.add_argument("--headless")
         self._options.add_argument("--disable-dev-sh-usage")
         prefs = {"profile.default_content_settings.popups": 0,
-            # "download.default_directory": os.getcwd() + "\Ical_Files", #Current Directory
-             "download.default_directory": "tmp/", #Current Directory
+            #"download.default_directory": os.getcwd() + "\Ical_Files", #Current Directory
+              "download.default_directory": "tmp/", #Current Directory
              "directory_upgrade": True}
         self._options.add_experimental_option("prefs", prefs)
     
@@ -115,7 +115,7 @@ class WebsiteUntis:
             WebsiteUntis.Data = [el for el in WebsiteUntis.Data if UserData not in el]
             WebsiteUntis.ThreadTime = [el for el in WebsiteUntis.ThreadTime if UserData not in el]
             
-            return data
+            return {"Subjects":data}
 
         else:
             return "Fehler ..."
@@ -140,9 +140,9 @@ class WebsiteUntis:
     
     def _setFilePath(self):
         name = self._username.replace('ss','ß').split('.')
-        #fileName = name[1][0:6].capitalize() + name[0][0:3].capitalize()
+        fileName = name[1][0:6].capitalize() + name[0][0:3].capitalize()
         self._filePath = f"tmp/{fileName}.ics"
-        self._filePath = f"Ical_Files\{fileName}.ics"
+        #self._filePath = f"Ical_Files\{fileName}.ics"
         if os.path.exists(self._filePath):
             os.remove(self._filePath)
             
@@ -150,7 +150,7 @@ class WebsiteUntis:
         
         UserData = f"{self._username}{self._password}"
         try:
-           # driver = webdriver.Chrome(chrome_options=self._options)
+            #driver = webdriver.Chrome(chrome_options=self._options)
             driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), chrome_options=self._options)
             driver.set_window_position(0, 0)
             driver.set_window_size(1902, 768)
@@ -169,7 +169,6 @@ class WebsiteUntis:
             ical_Download_Button = WebDriverWait(driver, 50).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel)))
             
             ical_Download_Button.click()
-            #Work here to save in Heroku download temp Ordner
             while os.path.exists(self._filePath) == False:
                 time.sleep(0.001)
             
