@@ -96,7 +96,6 @@ class WebsiteUntis:
 
     def getWebSubjects(self):
         print(WebsiteUntis.Threads, WebsiteUntis.Data, WebsiteUntis.ThreadTime)
-        self.proofThreadTime()
         
         if self._userData not in WebsiteUntis.Threads and not self.proofData():
             self._setFilePath()
@@ -107,6 +106,7 @@ class WebsiteUntis:
             return "Collecting startet, please wait..."
         
         if self._userData in WebsiteUntis.Threads and not self.proofData():
+            self.proofThreadTime()
             return "Collecting data, please wait..."
         
         if self.proofData():
