@@ -87,8 +87,8 @@ class WebsiteUntis:
         self._options.add_argument("--headless")
         self._options.add_argument("--disable-dev-sh-usage")
         prefs = {"profile.default_content_settings.popups": 0,
-             "download.default_directory": 
-                        os.getcwd() + "\Ical_Files", #Current Directory
+             #"download.default_directory": os.getcwd() + "\Ical_Files", #Current Directory
+             "download.default_directory": "tmp/", #Current Directory
              "directory_upgrade": True}
         self._options.add_experimental_option("prefs", prefs)
     
@@ -129,7 +129,7 @@ class WebsiteUntis:
     def _setFilePath(self):
         name = self._username.replace('ss','ß').split('.')
         fileName = name[1][0:6].capitalize() + name[0][0:3].capitalize()
-        self._filePath = f"Ical_Files\{fileName}.ics"
+        self._filePath = f"tmp/{fileName}.ics"
         if os.path.exists(self._filePath):
             os.remove(self._filePath)
             
@@ -160,6 +160,8 @@ class WebsiteUntis:
         
         ical_Download_Button.click()
         print("3")
+        
+        #Work here to save in Heroku download temp Ordner
         while os.path.exists(self._filePath) == False:
             print("4")
             time.sleep(0.001)
