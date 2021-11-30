@@ -73,6 +73,7 @@ class WebsiteUntis:
     
     Data = []
     Threads = []
+    ThreadTime = []
     
     def __init__(self, username, password):
         
@@ -80,11 +81,11 @@ class WebsiteUntis:
         self._username = username
         self._password = password
         self._filePath = ""
-        
+        self._ScrapingWaitTime = 50
         self._options = webdriver.ChromeOptions()
         self._options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
         self._options.add_argument("--no-sandbox")
-        self._options.add_argument("--headless")
+        #self._options.add_argument("--headless")
         self._options.add_argument("--disable-dev-sh-usage")
         prefs = {"profile.default_content_settings.popups": 0,
              #"download.default_directory": os.getcwd() + "\Ical_Files", #Current Directory
@@ -94,27 +95,30 @@ class WebsiteUntis:
     
 
     def getWebSubjects(self):
-                UserData = f"{self._username}{self._password}"
-                print(UserData)
-                print(str(WebsiteUntis.Threads) + str(WebsiteUntis.Data))
-                
-                if UserData not in WebsiteUntis.Threads and not self.proofData():
-                    self._setFilePath()
-                    WebsiteUntis.Threads.append(UserData)
-                    t = Thread(target=self.downloadIcal, args=(WebsiteUntis.Data, WebsiteUntis.Threads))
-                    t.start()
-                    return "Collecting startet, please wait..."
-                
-                if UserData in WebsiteUntis.Threads and not self.proofData():
-                    return "Collecting data, please wait..."
-                
-                if self.proofData():
-                    data = [el[UserData] for el in WebsiteUntis.Data if UserData in el]
-                    WebsiteUntis.Data = [el for el in WebsiteUntis.Data if UserData not in el]
-                    return data
+        self.proofThreadTime()
+        print(WebsiteUntis.Threads, WebsiteUntis.Data, WebsiteUntis.ThreadTime)
+        UserData = f"{self._username}{self._password}"
+        
+        if UserData not in WebsiteUntis.Threads and not self.proofData():
+            self._setFilePath()
+            WebsiteUntis.Threads.append(UserData)
+            WebsiteUntis.ThreadTime.append({UserData : time.time()})
+            t = Thread(target=self.downloadIcal, args=(WebsiteUntis.Data, WebsiteUntis.Threads, WebsiteUntis.ThreadTime))
+            t.start()
+            return "Collecting startet, please wait..."
+        
+        if UserData in WebsiteUntis.Threads and not self.proofData():
+            return "Collecting data, please wait..."
+        
+        if self.proofData():
+            data = [el[UserData] for el in WebsiteUntis.Data if UserData in el]
+            WebsiteUntis.Data = [el for el in WebsiteUntis.Data if UserData not in el]
+            WebsiteUntis.ThreadTime = [el for el in WebsiteUntis.ThreadTime if UserData not in el]
+            
+            return data
 
-                else:
-                    return "Fehler ..."
+        else:
+            return "Fehler ..."
                 
     def proofData(self):
         UserData = f"{self._username}{self._password}"
@@ -123,17 +127,25 @@ class WebsiteUntis:
                 return True
         return False
     
-    def proofTime(self):
-        pass
+    def proofThreadTime(self):
+        UserData = f"{self._username}{self._password}"
+        now = time.time()
+        for el in WebsiteUntis.ThreadTime:
+            for ThreadName in el:
+                StartTime = el[ThreadName]
+                if now - StartTime > self._ScrapingWaitTime:
+                    WebsiteUntis.Threads.remove(f"{self._username}{self._password}")
+                    WebsiteUntis.ThreadTime = [el for el in WebsiteUntis.ThreadTime if UserData not in el]
     
     def _setFilePath(self):
         name = self._username.replace('ss','ß').split('.')
         fileName = name[1][0:6].capitalize() + name[0][0:3].capitalize()
         self._filePath = f"tmp/{fileName}.ics"
+        #self._filePath = f"Ical_Files\{fileName}.ics"
         if os.path.exists(self._filePath):
             os.remove(self._filePath)
             
-    def downloadIcal(self, Data, Processes):
+    def downloadIcal(self, Data, Processes, ThreadTime):
         UserData = f"{self._username}{self._password}"
         
         #driver = webdriver.Chrome(chrome_options=self._options)
@@ -164,5 +176,6 @@ class WebsiteUntis:
         data = self._ical.getSubjectData()
         Data.append({UserData : data})
         Processes.remove(f"{self._username}{self._password}")
+        ThreadTime = [el for el in ThreadTime if UserData not in el]
 
 
