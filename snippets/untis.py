@@ -161,9 +161,10 @@ class WebsiteUntis:
         ical_Download_Button.click()
         print("3")
         while os.path.exists(self._filePath) == False:
+            print("4")
             time.sleep(0.001)
         
-        print("4")
+        
         self._ical = Ical.Ical(self._filePath)
         data = self._ical.getSubjectData()
         Data.append({UserData : data})
