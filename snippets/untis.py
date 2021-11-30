@@ -76,10 +76,10 @@ class WebsiteUntis:
     ThreadTime = []
     
     def __init__(self, username, password):
-        
         self._ical = 0
         self._username = username
         self._password = password
+        self._userData = f"{self._username}"
         self._filePath = ""
         self._ScrapingWaitTime = 50
         self._options = webdriver.ChromeOptions()
@@ -97,23 +97,22 @@ class WebsiteUntis:
     def getWebSubjects(self):
         print(WebsiteUntis.Threads, WebsiteUntis.Data, WebsiteUntis.ThreadTime)
         self.proofThreadTime()
-        UserData = f"{self._username}{self._password}"
         
-        if UserData not in WebsiteUntis.Threads and not self.proofData():
+        if self._userData not in WebsiteUntis.Threads and not self.proofData():
             self._setFilePath()
-            WebsiteUntis.Threads.append(UserData)
-            WebsiteUntis.ThreadTime.append({UserData : time.time()})
+            WebsiteUntis.Threads.append(self._userData)
+            WebsiteUntis.ThreadTime.append({self._userData : time.time()})
             t = Thread(target=self.downloadIcal, args=(WebsiteUntis.Data, WebsiteUntis.Threads, WebsiteUntis.ThreadTime))
             t.start()
             return "Collecting startet, please wait..."
         
-        if UserData in WebsiteUntis.Threads and not self.proofData():
+        if self._userData in WebsiteUntis.Threads and not self.proofData():
             return "Collecting data, please wait..."
         
         if self.proofData():
-            data = [el[UserData] for el in WebsiteUntis.Data if UserData in el]
-            WebsiteUntis.Data = [el for el in WebsiteUntis.Data if UserData not in el]
-            WebsiteUntis.ThreadTime = [el for el in WebsiteUntis.ThreadTime if UserData not in el]
+            data = [el[self._userData] for el in WebsiteUntis.Data if self._userData in el]
+            WebsiteUntis.Data = [el for el in WebsiteUntis.Data if self._userData not in el]
+            WebsiteUntis.ThreadTime = [el for el in WebsiteUntis.ThreadTime if self._userData not in el]
             
             return {"Subjects":data}
 
@@ -121,22 +120,20 @@ class WebsiteUntis:
             return "Fehler ..."
                 
     def proofData(self):
-        UserData = f"{self._username}{self._password}"
         for el in WebsiteUntis.Data:
-            if UserData in el:
+            if self._userData in el:
                 return True
         return False
     
     def proofThreadTime(self):
-        UserData = f"{self._username}{self._password}"
         now = time.time()
         for el in WebsiteUntis.ThreadTime:
             for ThreadName in el:
                 StartTime = el[ThreadName]
                 print(now - StartTime)
                 if now - StartTime > self._ScrapingWaitTime:
-                    WebsiteUntis.Threads.remove(f"{self._username}{self._password}")
-                    WebsiteUntis.ThreadTime = [el for el in WebsiteUntis.ThreadTime if UserData not in el]
+                    WebsiteUntis.Threads.remove()
+                    WebsiteUntis.ThreadTime = [el for el in WebsiteUntis.ThreadTime if self._userData not in el]
     
     def _setFilePath(self):
         name = self._username.replace('ss','ß').split('.')
@@ -147,8 +144,6 @@ class WebsiteUntis:
             os.remove(self._filePath)
             
     def downloadIcal(self, Data, Processes, ThreadTime):
-        
-        UserData = f"{self._username}{self._password}"
         try:
             #driver = webdriver.Chrome(chrome_options=self._options)
             driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), chrome_options=self._options)
@@ -175,12 +170,12 @@ class WebsiteUntis:
             
             self._ical = Ical.Ical(self._filePath)
             data = self._ical.getSubjectData()
-            Data.append({UserData : data})
-            Processes.remove(f"{self._username}{self._password}")
-            ThreadTime = [el for el in ThreadTime if UserData not in el]
+            Data.append({self._userData : data})
+            Processes.remove()
+            ThreadTime = [el for el in ThreadTime if self._userData not in el]
   
         except:
-            Processes.remove(f"{self._username}{self._password}")
-            ThreadTime = [el for el in ThreadTime if UserData not in el]
+            Processes.remove()
+            ThreadTime = [el for el in ThreadTime if self._userData not in el]
 
 
