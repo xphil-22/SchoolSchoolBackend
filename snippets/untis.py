@@ -134,6 +134,7 @@ class WebsiteUntis:
             os.remove(self._filePath)
             
     def downloadIcal(self, Data, Processes):
+        print("Startet")
         UserData = f"{self._username}{self._password}"
         
         #driver = webdriver.Chrome(chrome_options=self._options)
@@ -146,20 +147,23 @@ class WebsiteUntis:
         input_fields[0].send_keys(self._username)
         input_fields[1].send_keys(self._password)
         driver.find_element(By.CLASS_NAME, 'redesigned-button').click()
-
+        print("1")
         tt = WebDriverWait(driver, 40).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="root"]/div/div/div[2]/div[1]/div/a[5]/div/div/div[2]')))
         tt.click()
+        print("2")
         driver.refresh()
         WebDriverWait(driver, 40).until(EC.presence_of_element_located((By.ID, 'embedded-webuntis')))
         driver.switch_to.frame('embedded-webuntis')
-
+        print("3")
         sel = '#dijit_layout__LayoutWidget_0 > section > div > div > div.un-flex-pane.un-flex-pane--fixed.un-timetable-page__header > div > form > div.float-right.btn-group > button:nth-child(1)'
         ical_Download_Button = WebDriverWait(driver, 40).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel)))
         
         ical_Download_Button.click()
+        print("3")
         while os.path.exists(self._filePath) == False:
             time.sleep(0.001)
-            
+        
+        print("4")
         self._ical = Ical.Ical(self._filePath)
         data = self._ical.getSubjectData()
         Data.append({UserData : data})
