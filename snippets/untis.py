@@ -132,7 +132,7 @@ class WebsiteUntis:
                 StartTime = el[ThreadName]
                 print(now - StartTime)
                 if now - StartTime > self._ScrapingWaitTime:
-                    WebsiteUntis.Threads.remove()
+                    WebsiteUntis.Threads.remove(self._userData)
                     WebsiteUntis.ThreadTime = [el for el in WebsiteUntis.ThreadTime if self._userData not in el]
     
     def _setFilePath(self):
@@ -171,11 +171,11 @@ class WebsiteUntis:
             self._ical = Ical.Ical(self._filePath)
             data = self._ical.getSubjectData()
             Data.append({self._userData : data})
-            Processes.remove()
+            Processes.remove(self._userData)
             ThreadTime = [el for el in ThreadTime if self._userData not in el]
   
         except:
-            Processes.remove()
+            Processes.remove(self._userData)
             ThreadTime = [el for el in ThreadTime if self._userData not in el]
 
 
