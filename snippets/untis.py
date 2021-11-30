@@ -88,7 +88,7 @@ class WebsiteUntis:
         #self._options.add_argument("--headless")
         self._options.add_argument("--disable-dev-sh-usage")
         prefs = {"profile.default_content_settings.popups": 0,
-             #"download.default_directory": os.getcwd() + "\Ical_Files", #Current Directory
+            # "download.default_directory": os.getcwd() + "\Ical_Files", #Current Directory
              "download.default_directory": "tmp/", #Current Directory
              "directory_upgrade": True}
         self._options.add_experimental_option("prefs", prefs)
@@ -133,49 +133,55 @@ class WebsiteUntis:
         for el in WebsiteUntis.ThreadTime:
             for ThreadName in el:
                 StartTime = el[ThreadName]
+                print(now - StartTime)
                 if now - StartTime > self._ScrapingWaitTime:
                     WebsiteUntis.Threads.remove(f"{self._username}{self._password}")
                     WebsiteUntis.ThreadTime = [el for el in WebsiteUntis.ThreadTime if UserData not in el]
     
     def _setFilePath(self):
         name = self._username.replace('ss','ß').split('.')
-        fileName = name[1][0:6].capitalize() + name[0][0:3].capitalize()
+        #fileName = name[1][0:6].capitalize() + name[0][0:3].capitalize()
         self._filePath = f"tmp/{fileName}.ics"
-        #self._filePath = f"Ical_Files\{fileName}.ics"
+        self._filePath = f"Ical_Files\{fileName}.ics"
         if os.path.exists(self._filePath):
             os.remove(self._filePath)
             
     def downloadIcal(self, Data, Processes, ThreadTime):
+        
         UserData = f"{self._username}{self._password}"
-        
-        #driver = webdriver.Chrome(chrome_options=self._options)
-        driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), chrome_options=self._options)
-        driver.set_window_position(0, 0)
-        driver.set_window_size(1902, 768)
-        
-        driver.get("https://terpsichore.webuntis.com/WebUntis/?school=RFGS-Freiburg#/basic/login")
-        input_fields = driver.find_elements(By.CLASS_NAME, 'un-input-group__input')
-        input_fields[0].send_keys(self._username)
-        input_fields[1].send_keys(self._password)
-        driver.find_element(By.CLASS_NAME, 'redesigned-button').click()
-        tt = WebDriverWait(driver, 40).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="root"]/div/div/div[2]/div[1]/div/a[5]/div/div/div[2]')))
-        tt.click()
-        driver.refresh()
-        WebDriverWait(driver, 40).until(EC.presence_of_element_located((By.ID, 'embedded-webuntis')))
-        driver.switch_to.frame('embedded-webuntis')
-        sel = '#dijit_layout__LayoutWidget_0 > section > div > div > div.un-flex-pane.un-flex-pane--fixed.un-timetable-page__header > div > form > div.float-right.btn-group > button:nth-child(1)'
-        ical_Download_Button = WebDriverWait(driver, 40).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel)))
-        
-        ical_Download_Button.click()
-        #Work here to save in Heroku download temp Ordner
-        while os.path.exists(self._filePath) == False:
-            time.sleep(0.001)
-        
-        
-        self._ical = Ical.Ical(self._filePath)
-        data = self._ical.getSubjectData()
-        Data.append({UserData : data})
-        Processes.remove(f"{self._username}{self._password}")
-        ThreadTime = [el for el in ThreadTime if UserData not in el]
+        try:
+           # driver = webdriver.Chrome(chrome_options=self._options)
+            driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), chrome_options=self._options)
+            driver.set_window_position(0, 0)
+            driver.set_window_size(1902, 768)
+            
+            driver.get("https://terpsichore.webuntis.com/WebUntis/?school=RFGS-Freiburg#/basic/login")
+            input_fields = driver.find_elements(By.CLASS_NAME, 'un-input-group__input')
+            input_fields[0].send_keys(self._username)
+            input_fields[1].send_keys(self._password)
+            driver.find_element(By.CLASS_NAME, 'redesigned-button').click()
+            tt = WebDriverWait(driver, 50).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="root"]/div/div/div[2]/div[1]/div/a[5]/div/div/div[2]')))
+            tt.click()
+            driver.refresh()
+            WebDriverWait(driver, 50).until(EC.presence_of_element_located((By.ID, 'embedded-webuntis')))
+            driver.switch_to.frame('embedded-webuntis')
+            sel = '#dijit_layout__LayoutWidget_0 > section > div > div > div.un-flex-pane.un-flex-pane--fixed.un-timetable-page__header > div > form > div.float-right.btn-group > button:nth-child(1)'
+            ical_Download_Button = WebDriverWait(driver, 50).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel)))
+            
+            ical_Download_Button.click()
+            #Work here to save in Heroku download temp Ordner
+            while os.path.exists(self._filePath) == False:
+                time.sleep(0.001)
+            
+            
+            self._ical = Ical.Ical(self._filePath)
+            data = self._ical.getSubjectData()
+            Data.append({UserData : data})
+            Processes.remove(f"{self._username}{self._password}")
+            ThreadTime = [el for el in ThreadTime if UserData not in el]
+  
+        except:
+            Processes.remove(f"{self._username}{self._password}")
+            ThreadTime = [el for el in ThreadTime if UserData not in el]
 
 
