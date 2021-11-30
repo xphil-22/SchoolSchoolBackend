@@ -135,6 +135,7 @@ class WebsiteUntis:
             
     def downloadIcal(self, Data, Processes):
         UserData = f"{self._username}{self._password}"
+        
         #driver = webdriver.Chrome(chrome_options=self._options)
         driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), chrome_options=self._options)
         driver.set_window_position(0, 0)
