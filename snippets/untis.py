@@ -95,8 +95,8 @@ class WebsiteUntis:
     
 
     def getWebSubjects(self):
-        self.proofThreadTime()
         print(WebsiteUntis.Threads, WebsiteUntis.Data, WebsiteUntis.ThreadTime)
+        self.proofThreadTime()
         UserData = f"{self._username}{self._password}"
         
         if UserData not in WebsiteUntis.Threads and not self.proofData():
