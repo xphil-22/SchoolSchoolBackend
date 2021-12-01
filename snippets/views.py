@@ -114,7 +114,7 @@ class WebUntisLogin(APIView):
                 self.request.user.profile.untisUsername = Raw_Data['username'] 
                 self.request.user.profile.untisPassword = Raw_Data['password']
                 self.request.user.save()               
-                return Response(status=status.HTTP_200_OK)
+                return Response("True")
             else:
                  raise APIException("Wrong credentials")
            
@@ -133,7 +133,7 @@ class changeLoginData(APIView):
                 self.request.user.profile.untisUsername = Raw_Data['username'] 
                 self.request.user.profile.untisPassword = Raw_Data['password']
                 self.request.user.save()               
-                return Response(status=status.HTTP_200_OK)
+                return Response("True")
             else:
                  raise APIException("Wrong credentials")
 
@@ -157,8 +157,10 @@ def webuntis(request):
         if loggedIn:
             web = untis.WebsiteUntis(username, password)
             return JsonResponse(web.getWebSubjects(), safe=False)
+        else:
+            return HttpResponse("Wrong Webuntis credentials in Database, maybe you have to change your Login Data via: 'webuntis/changeLoginData'")
+    
 
-     
     if request.GET.get('classes') == 'all':
         u = untis.Untis()
         loggedIn = u.newSession(username, password)
