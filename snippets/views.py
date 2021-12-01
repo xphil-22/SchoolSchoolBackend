@@ -114,7 +114,7 @@ class WebUntisLogin(APIView):
                 self.request.user.profile.untisUsername = Raw_Data['username'] 
                 self.request.user.profile.untisPassword = Raw_Data['password']
                 self.request.user.save()               
-                return Response("True")
+                return Response({"LoginData":True})
             else:
                  raise APIException("Wrong credentials")
            
@@ -133,7 +133,7 @@ class changeLoginData(APIView):
                 self.request.user.profile.untisUsername = Raw_Data['username'] 
                 self.request.user.profile.untisPassword = Raw_Data['password']
                 self.request.user.save()               
-                return Response("True")
+                return Response({"LoginData":True})
             else:
                  raise APIException("Wrong credentials")
 
