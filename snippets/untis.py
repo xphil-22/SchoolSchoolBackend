@@ -4,7 +4,7 @@ import datetime
 import json
 import ast
 import time
-
+import json
 #SELENIUM IMPORTS
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -16,9 +16,9 @@ from selenium.webdriver.chrome.options import Options
 from snippets import Ical
 import os
 
-from multiprocessing import Process
-from snippets import Async
+from threading import Thread
 class Untis:
+    
     def __init__(self):
         self._session = 0
         
@@ -71,95 +71,111 @@ class Untis:
 
 class WebsiteUntis:
     
+    Data = []
+    Threads = []
+    ThreadTime = []
+    
     def __init__(self, username, password):
         self._ical = 0
         self._username = username
         self._password = password
+        self._userData = f"{self._username}"
         self._filePath = ""
-        self._Async = Async.Async()
-        
+        self._ScrapingWaitTime = 50
         self._options = webdriver.ChromeOptions()
         self._options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
         self._options.add_argument("--no-sandbox")
         self._options.add_argument("--headless")
         self._options.add_argument("--disable-dev-sh-usage")
         prefs = {"profile.default_content_settings.popups": 0,
-             "download.default_directory": 
-                        os.getcwd() + "\Ical_Files", #Current Directory
+            #"download.default_directory": os.getcwd() + "\Ical_Files", #Current Directory
+              "download.default_directory": "tmp/", #Current Directory
              "directory_upgrade": True}
         self._options.add_experimental_option("prefs", prefs)
-        
+    
+
     def getWebSubjects(self):
-        if self.proofAsyncData() == False and [self._username, self._password] not in self._Async.getData(): 
+        print(WebsiteUntis.Threads, WebsiteUntis.Data, WebsiteUntis.ThreadTime)
+        
+        if self._userData not in WebsiteUntis.Threads and not self.proofData():
             self._setFilePath()
-            self._Async.addProcess(f"{self._username}{self._password}")
-            
-            self.downloadIcal()
-            p1 = Process(target=self.downloadIcal)
-            p1.start()
+            WebsiteUntis.Threads.append(self._userData)
+            WebsiteUntis.ThreadTime.append({self._userData : time.time()})
+            t = Thread(target=self.downloadIcal, args=(WebsiteUntis.Data, WebsiteUntis.Threads, WebsiteUntis.ThreadTime))
+            t.start()
             return "Collecting startet, please wait..."
         
-        elif f"{self._username}{self._password}" in self._Async.getProcesses():
+        if self._userData in WebsiteUntis.Threads and not self.proofData():
+            self.proofThreadTime()
             return "Collecting data, please wait..."
         
-        else:    
-            return self._Async.getData[f"{self._username}{self._password}"]
-    
-    def proofAsyncData(self):
-        for el in self._Async.getData():
-            if f"{self._username}{self._password}" in el:
-                return el[f"{self._username}{self._password}"]
+        if self.proofData():
+            data = [el[self._userData] for el in WebsiteUntis.Data if self._userData in el]
+            WebsiteUntis.Data = [el for el in WebsiteUntis.Data if self._userData not in el]
+            WebsiteUntis.ThreadTime = [el for el in WebsiteUntis.ThreadTime if self._userData not in el]
+            
+            return {"Subjects":data}
+
         else:
-            return False
+            return "Fehler ..."
+                
+    def proofData(self):
+        for el in WebsiteUntis.Data:
+            if self._userData in el:
+                return True
+        return False
     
-    def runInParallel(*fns):
-        proc = []
-        for fn in fns:
-            p = Process(target=fn)
-            p.start()
-            proc.append(p)
-        for p in proc:
-            p.join()
+    def proofThreadTime(self):
+        now = time.time()
+        for el in WebsiteUntis.ThreadTime:
+            for ThreadName in el:
+                StartTime = el[ThreadName]
+                print(now - StartTime)
+                if now - StartTime > self._ScrapingWaitTime:
+                    WebsiteUntis.Threads.remove(self._userData)
+                    WebsiteUntis.ThreadTime = [el for el in WebsiteUntis.ThreadTime if self._userData not in el]
     
     def _setFilePath(self):
         name = self._username.replace('ss','ß').split('.')
         fileName = name[1][0:6].capitalize() + name[0][0:3].capitalize()
-        self._filePath = f"Ical_Files\{fileName}.ics"
+        self._filePath = f"tmp/{fileName}.ics"
+        #self._filePath = f"Ical_Files\{fileName}.ics"
         if os.path.exists(self._filePath):
             os.remove(self._filePath)
             
-    def downloadIcal(self):
-        print("download Ical:" , self._Async.getData())
-        driver = webdriver.Chrome(chrome_options=self._options)
-        #driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), chrome_options=self._options)
-        driver.set_window_position(0, 0)
-        driver.set_window_size(1902, 768)
-        
-        driver.get("https://terpsichore.webuntis.com/WebUntis/?school=RFGS-Freiburg#/basic/login")
-        input_fields = driver.find_elements(By.CLASS_NAME, 'un-input-group__input')
-        input_fields[0].send_keys(self._username)
-        input_fields[1].send_keys(self._password)
-        driver.find_element(By.CLASS_NAME, 'redesigned-button').click()
-
-        tt = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="root"]/div/div/div[2]/div[1]/div/a[5]/div/div/div[2]')))
-        tt.click()
-        
-        WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, 'embedded-webuntis')))
-        driver.switch_to.frame('embedded-webuntis')
-
-       
-        sel = '#dijit_layout__LayoutWidget_0 > section > div > div > div.un-flex-pane.un-flex-pane--fixed.un-timetable-page__header > div > form > div.float-right.btn-group > button:nth-child(1)'
-        ical_Download_Button = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel)))
-        
-        ical_Download_Button.click()
-        while os.path.exists(self._filePath) == False:
-            time.sleep(0.001)
+    def downloadIcal(self, Data, Processes, ThreadTime):
+        try:
+            #driver = webdriver.Chrome(chrome_options=self._options)
+            driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), chrome_options=self._options)
+            driver.set_window_position(0, 0)
+            driver.set_window_size(1902, 768)
             
-        self._ical = Ical.Ical(self._filePath)
-        data = self._ical.getSubjectData()
-        self._Async.addData({f"{self._username}{self._password}" : data})
-        print(data)
-        self._Async.removeProcess(f"{self._username}{self._password}")
-
+            driver.get("https://terpsichore.webuntis.com/WebUntis/?school=RFGS-Freiburg#/basic/login")
+            input_fields = driver.find_elements(By.CLASS_NAME, 'un-input-group__input')
+            input_fields[0].send_keys(self._username)
+            input_fields[1].send_keys(self._password)
+            driver.find_element(By.CLASS_NAME, 'redesigned-button').click()
+            tt = WebDriverWait(driver, 50).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="root"]/div/div/div[2]/div[1]/div/a[5]/div/div/div[2]')))
+            tt.click()
+            driver.refresh()
+            WebDriverWait(driver, 50).until(EC.presence_of_element_located((By.ID, 'embedded-webuntis')))
+            driver.switch_to.frame('embedded-webuntis')
+            sel = '#dijit_layout__LayoutWidget_0 > section > div > div > div.un-flex-pane.un-flex-pane--fixed.un-timetable-page__header > div > form > div.float-right.btn-group > button:nth-child(1)'
+            ical_Download_Button = WebDriverWait(driver, 50).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel)))
+            
+            ical_Download_Button.click()
+            while os.path.exists(self._filePath) == False:
+                time.sleep(0.001)
+            
+            
+            self._ical = Ical.Ical(self._filePath)
+            data = self._ical.getSubjectData()
+            Data.append({self._userData : data})
+            Processes.remove(self._userData)
+            ThreadTime = [el for el in ThreadTime if self._userData not in el]
+  
+        except:
+            Processes.remove(self._userData)
+            ThreadTime = [el for el in ThreadTime if self._userData not in el]
 
 
