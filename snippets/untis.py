@@ -89,8 +89,8 @@ class WebsiteUntis:
         self._options.add_argument("--disable-dev-sh-usage")
         prefs = {"profile.default_content_settings.popups": 0,
             #"download.default_directory": os.getcwd() + "\Ical_Files", #Current Directory
-              "download.default_directory": "tmp/", #Current Directory
-             "directory_upgrade": True}
+            "download.default_directory": "tmp/", #Current Directory
+            "directory_upgrade": True}
         self._options.add_experimental_option("prefs", prefs)
     
 
@@ -145,6 +145,7 @@ class WebsiteUntis:
             
     def downloadIcal(self, Data, Processes, ThreadTime):
         try:
+            print("1")
             #driver = webdriver.Chrome(chrome_options=self._options)
             driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), chrome_options=self._options)
             driver.set_window_position(0, 0)
@@ -162,20 +163,22 @@ class WebsiteUntis:
             driver.switch_to.frame('embedded-webuntis')
             sel = '#dijit_layout__LayoutWidget_0 > section > div > div > div.un-flex-pane.un-flex-pane--fixed.un-timetable-page__header > div > form > div.float-right.btn-group > button:nth-child(1)'
             ical_Download_Button = WebDriverWait(driver, 50).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel)))
-            
+            print("2")
             ical_Download_Button.click()
             while os.path.exists(self._filePath) == False:
                 time.sleep(0.001)
             
-            
+            print("3")
             self._ical = Ical.Ical(self._filePath)
             data = self._ical.getSubjectData()
             Data.append({self._userData : data})
             Processes.remove(self._userData)
             ThreadTime = [el for el in ThreadTime if self._userData not in el]
-  
+            print("4")
         except:
+            print("5")
             Processes.remove(self._userData)
             ThreadTime = [el for el in ThreadTime if self._userData not in el]
+            print("6")
 
 
