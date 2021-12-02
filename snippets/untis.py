@@ -68,7 +68,7 @@ class Untis:
     "SELENIUM STUFF STARTS HERE"
 
 
-
+local = False
 class WebsiteUntis:
     
     Data = []
@@ -87,9 +87,14 @@ class WebsiteUntis:
         self._options.add_argument("--no-sandbox")
         self._options.add_argument("--headless")
         self._options.add_argument("--disable-dev-sh-usage")
+        path = None
+        if local:
+            path =  os.getcwd() + "\Ical_Files" #Current Directory
+        else:
+            path =  "tmp/" #Current Directory
+            
         prefs = {"profile.default_content_settings.popups": 0,
-            #"download.default_directory": os.getcwd() + "\Ical_Files", #Current Directory
-            "download.default_directory": "tmp/", #Current Directory
+            "download.default_directory": path,
             "directory_upgrade": True}
         self._options.add_experimental_option("prefs", prefs)
     
@@ -113,7 +118,7 @@ class WebsiteUntis:
             WebsiteUntis.Data = [el for el in WebsiteUntis.Data if self._userData not in el]
             WebsiteUntis.ThreadTime = [el for el in WebsiteUntis.ThreadTime if self._userData not in el]
             
-            return {"done":0, "Subjects":data}
+            return {"done":0, "Subjects":data[0]}
 
         else:
             return {"done": -1}
@@ -137,16 +142,22 @@ class WebsiteUntis:
     def _setFilePath(self):
         name = self._username.replace('ss','ß').split('.')
         fileName = name[1][0:6].capitalize() + name[0][0:3].capitalize()
-        self._filePath = f"tmp/{fileName}.ics"
-        #self._filePath = f"Ical_Files\{fileName}.ics"
+        if local:
+            self._filePath = f"Ical_Files\{fileName}.ics"
+        else:
+            self._filePath = f"tmp/{fileName}.ics"
+            
         if os.path.exists(self._filePath):
             os.remove(self._filePath)
             
     def downloadIcal(self, Data, Processes, ThreadTime):
         try:
+            if local:
+                driver = webdriver.Chrome(chrome_options=self._options)
+            else:
+                driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), chrome_options=self._options)
+                
             print("1")
-            #driver = webdriver.Chrome(chrome_options=self._options)
-            driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), chrome_options=self._options)
             driver.set_window_position(0, 0)
             driver.set_window_size(1902, 768)
             
@@ -164,7 +175,8 @@ class WebsiteUntis:
             ical_Download_Button = WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel)))
             print("2")
             ical_Download_Button.click()
-            while os.path.exists(self._filePath) == False:
+            start = time.time()
+            while os.path.exists(self._filePath) == False and time.time() - start < 30:
                 time.sleep(0.001)
             
             print("3")
@@ -176,6 +188,7 @@ class WebsiteUntis:
             print("3.5")
             driver.quit()
             print("4")
+            
         except:
             driver.quit()
             Processes.remove(self._userData)
