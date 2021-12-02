@@ -113,7 +113,7 @@ class WebsiteUntis:
             WebsiteUntis.Data = [el for el in WebsiteUntis.Data if self._userData not in el]
             WebsiteUntis.ThreadTime = [el for el in WebsiteUntis.ThreadTime if self._userData not in el]
             
-            return {"done":0, "Subjects":data}
+            return {"done":0, "Subjects":data[0]}
 
         else:
             return {"done": -1}
