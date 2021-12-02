@@ -146,19 +146,19 @@ def webuntis(request):
         password = request.user.profile.untisPassword
         
     except:
-        return HttpResponse("You have to Login first")
+        return JsonResponse({"data":"You have to Login first" })
     
     if username == "" or password == "":
-        return HttpResponse("You have to Login first")
+        return JsonResponse({"data":"You have to Login first"})
      
     if request.GET.get('subjects') == "":
         u = untis.Untis()
         loggedIn = u.newSession(username, password)
         if loggedIn:
             web = untis.WebsiteUntis(username, password)
-            return JsonResponse(web.getWebSubjects(), safe=False)
+            return JsonResponse(web.getWebSubjects())
         else:
-            return HttpResponse("Wrong Webuntis credentials in Database, maybe you have to change your Login Data via: 'webuntis/changeLoginData'")
+            return JsonResponse({"data": "Wrong Webuntis credentials in Database, maybe you have to change your Login Data via: 'webuntis/changeLoginData'"})
     
 
     if request.GET.get('classes') == 'all':
