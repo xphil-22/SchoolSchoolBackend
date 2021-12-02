@@ -85,7 +85,7 @@ class WebsiteUntis:
         self._options = webdriver.ChromeOptions()
         self._options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
         self._options.add_argument("--no-sandbox")
-        #self._options.add_argument("--headless")
+        self._options.add_argument("--headless")
         self._options.add_argument("--disable-dev-sh-usage")
         prefs = {"profile.default_content_settings.popups": 0,
             #"download.default_directory": os.getcwd() + "\Ical_Files", #Current Directory
@@ -103,21 +103,20 @@ class WebsiteUntis:
             WebsiteUntis.ThreadTime.append({self._userData : time.time()})
             t = Thread(target=self.downloadIcal, args=(WebsiteUntis.Data, WebsiteUntis.Threads, WebsiteUntis.ThreadTime))
             t.start()
-            return "Collecting startet, please wait..."
+            return {"done": 2}
         
         if self._userData in WebsiteUntis.Threads and not self.proofData():
-            #self.proofThreadTime()
-            return "Collecting data, please wait..."
+            return {"done": 1}
         
         if self.proofData():
             data = [el[self._userData] for el in WebsiteUntis.Data if self._userData in el]
             WebsiteUntis.Data = [el for el in WebsiteUntis.Data if self._userData not in el]
             WebsiteUntis.ThreadTime = [el for el in WebsiteUntis.ThreadTime if self._userData not in el]
             
-            return {"Subjects":data}
+            return {"done":0, "Subjects":data}
 
         else:
-            return "Fehler ..."
+            return {"done": -1}
                 
     def proofData(self):
         for el in WebsiteUntis.Data:
@@ -174,6 +173,8 @@ class WebsiteUntis:
             Data.append({self._userData : data})
             Processes.remove(self._userData)
             ThreadTime = [el for el in ThreadTime if self._userData not in el]
+            print("3.5")
+            driver.quit()
             print("4")
         except:
             driver.quit()
