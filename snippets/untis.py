@@ -81,11 +81,11 @@ class WebsiteUntis:
         self._password = password
         self._userData = f"{self._username}"
         self._filePath = ""
-        self._ScrapingWaitTime = 50
+        self._ScrapingWaitTime = 30
         self._options = webdriver.ChromeOptions()
         self._options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
         self._options.add_argument("--no-sandbox")
-        self._options.add_argument("--headless")
+        #self._options.add_argument("--headless")
         self._options.add_argument("--disable-dev-sh-usage")
         prefs = {"profile.default_content_settings.popups": 0,
             #"download.default_directory": os.getcwd() + "\Ical_Files", #Current Directory
@@ -106,7 +106,7 @@ class WebsiteUntis:
             return "Collecting startet, please wait..."
         
         if self._userData in WebsiteUntis.Threads and not self.proofData():
-            self.proofThreadTime()
+            #self.proofThreadTime()
             return "Collecting data, please wait..."
         
         if self.proofData():
@@ -156,13 +156,13 @@ class WebsiteUntis:
             input_fields[0].send_keys(self._username)
             input_fields[1].send_keys(self._password)
             driver.find_element(By.CLASS_NAME, 'redesigned-button').click()
-            tt = WebDriverWait(driver, 50).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="root"]/div/div/div[2]/div[1]/div/a[5]/div/div/div[2]')))
+            tt = WebDriverWait(driver, 30).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="root"]/div/div/div[2]/div[1]/div/a[5]/div/div/div[2]')))
             tt.click()
             driver.refresh()
-            WebDriverWait(driver, 50).until(EC.presence_of_element_located((By.ID, 'embedded-webuntis')))
+            WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.ID, 'embedded-webuntis')))
             driver.switch_to.frame('embedded-webuntis')
             sel = '#dijit_layout__LayoutWidget_0 > section > div > div > div.un-flex-pane.un-flex-pane--fixed.un-timetable-page__header > div > form > div.float-right.btn-group > button:nth-child(1)'
-            ical_Download_Button = WebDriverWait(driver, 50).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel)))
+            ical_Download_Button = WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel)))
             print("2")
             ical_Download_Button.click()
             while os.path.exists(self._filePath) == False:
@@ -176,7 +176,7 @@ class WebsiteUntis:
             ThreadTime = [el for el in ThreadTime if self._userData not in el]
             print("4")
         except:
-            print("5")
+            driver.quit()
             Processes.remove(self._userData)
             ThreadTime = [el for el in ThreadTime if self._userData not in el]
             print("6")
