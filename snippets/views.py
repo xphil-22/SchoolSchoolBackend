@@ -21,7 +21,7 @@ from rest_auth.views import LoginView
 from django.core.exceptions import SuspiciousOperation
 from rest_framework.response import Response
 from rest_framework.exceptions import APIException
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, authentication_classes
 import json
 from snippets import untis
 
@@ -136,10 +136,12 @@ class changeLoginData(APIView):
                 return Response({"LoginData":True})
             else:
                  raise APIException("Wrong credentials")
-
+             
+#---------------------------------------------------------------------------------------------------------
+@api_view(['GET'])
+@permission_classes((IsAuthenticated, ))
+@authentication_classes((TokenAuthentication, SessionAuthentication))
 def webuntis(request):
-    authentication_classes = [TokenAuthentication, SessionAuthentication]
-    permission_classes = [IsAuthenticated]
     
     try:
         username = request.user.profile.untisUsername
