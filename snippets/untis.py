@@ -85,13 +85,13 @@ class WebsiteUntis:
         self._options = webdriver.ChromeOptions()
         self._options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
         self._options.add_argument("--no-sandbox")
-        self._options.add_argument("--headless")
+        #self._options.add_argument("--headless")
         self._options.add_argument("--disable-dev-sh-usage")
-        path = None
+        
+        path =  "tmp/" #Current Directory
         if local:
             path =  os.getcwd() + "\Ical_Files" #Current Directory
-        else:
-            path =  "tmp/" #Current Directory
+            
             
         prefs = {"profile.default_content_settings.popups": 0,
             "download.default_directory": path,
@@ -100,13 +100,13 @@ class WebsiteUntis:
     
 
     def getWebSubjects(self):
-        print(WebsiteUntis.Threads, WebsiteUntis.Data, WebsiteUntis.ThreadTime)
+        print(WebsiteUntis.Threads, WebsiteUntis.Data)
         
         if self._userData not in WebsiteUntis.Threads and not self.proofData():
             self._setFilePath()
             WebsiteUntis.Threads.append(self._userData)
             WebsiteUntis.ThreadTime.append({self._userData : time.time()})
-            t = Thread(target=self.downloadIcal, args=(WebsiteUntis.Data, WebsiteUntis.Threads, WebsiteUntis.ThreadTime))
+            t = Thread(target=self.getIcals, args=(WebsiteUntis.Data, WebsiteUntis.Threads))
             t.start()
             return {"done": 2}
         
@@ -142,57 +142,106 @@ class WebsiteUntis:
     def _setFilePath(self):
         name = self._username.replace('ss','ß').split('.')
         fileName = name[1][0:6].capitalize() + name[0][0:3].capitalize()
+        self._filePath = f"tmp/{fileName}.ics"
         if local:
             self._filePath = f"Ical_Files\{fileName}.ics"
-        else:
-            self._filePath = f"tmp/{fileName}.ics"
             
         if os.path.exists(self._filePath):
             os.remove(self._filePath)
+        print(f"{self._filePath[:-4]} (1).ics")
+        if os.path.exists(f"{self._filePath[:-4]} (1).ics"):
+            os.remove(f"{self._filePath[:-4]} (1).ics")
             
-    def downloadIcal(self, Data, Processes, ThreadTime):
+        if os.path.exists(f"{self._filePath[:-4]} (2).ics"):
+            os.remove(f"{self._filePath[:-4]} (2).ics")
+    
+       
+    def startSelenium(self):
+        driver = webdriver.Chrome(chrome_options=self._options)
+        if not local:
+            driver = driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), chrome_options=self._options)
+            
+        print("1")
+        driver.set_window_position(0, 0)
+        driver.set_window_size(1902, 768)
+        
+        driver.get("https://terpsichore.webuntis.com/WebUntis/?school=RFGS-Freiburg#/basic/login")
+        input_fields = driver.find_elements(By.CLASS_NAME, 'un-input-group__input')
+        input_fields[0].send_keys(self._username)
+        input_fields[1].send_keys(self._password)
+        driver.find_element(By.CLASS_NAME, 'redesigned-button').click()
+        tt = WebDriverWait(driver, 30).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="root"]/div/div/div[2]/div[1]/div/a[5]/div/div/div[2]')))
+        tt.click()
+        driver.refresh()
+        WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.ID, 'embedded-webuntis')))
+        driver.switch_to.frame('embedded-webuntis')
+        return driver
+        
+    def stopSelenium(self, driver):
+        driver.quit()
+    
+    def proofDownloadCompleted(self):
+        if os.path.exists(self._filePath) and os.path.exists(f"{self._filePath[:-4]} (1).ics") and os.path.exists(f"{self._filePath[:-4]} (2).ics"):
+            return False
+        return True
+            
+    def getIcals(self, Data, Processes):
         try:
-            if local:
-                driver = webdriver.Chrome(chrome_options=self._options)
-            else:
-                driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), chrome_options=self._options)
-                
-            print("1")
-            driver.set_window_position(0, 0)
-            driver.set_window_size(1902, 768)
-            
-            driver.get("https://terpsichore.webuntis.com/WebUntis/?school=RFGS-Freiburg#/basic/login")
-            input_fields = driver.find_elements(By.CLASS_NAME, 'un-input-group__input')
-            input_fields[0].send_keys(self._username)
-            input_fields[1].send_keys(self._password)
-            driver.find_element(By.CLASS_NAME, 'redesigned-button').click()
-            tt = WebDriverWait(driver, 30).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="root"]/div/div/div[2]/div[1]/div/a[5]/div/div/div[2]')))
-            tt.click()
-            driver.refresh()
-            WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.ID, 'embedded-webuntis')))
-            driver.switch_to.frame('embedded-webuntis')
-            sel = '#dijit_layout__LayoutWidget_0 > section > div > div > div.un-flex-pane.un-flex-pane--fixed.un-timetable-page__header > div > form > div.float-right.btn-group > button:nth-child(1)'
-            ical_Download_Button = WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel)))
             print("2")
-            ical_Download_Button.click()
-            start = time.time()
-            while os.path.exists(self._filePath) == False and time.time() - start < 30:
-                time.sleep(0.001)
-            
+            funcs = [self.downloadIcalThisWeek, self.downloadIcalLastWeek, self.downloadIcalNextWeek]
+            threads = []
             print("3")
+            for func in funcs:
+                t = Thread(target=func)
+                t.start()
+                threads.append(t)
+                
+            for th in threads:
+                th.join()
+                
+            print("Downloads beendet")
+                
             self._ical = Ical.Ical(self._filePath)
             data = self._ical.getSubjectData()
             Data.append({self._userData : data})
-            Processes.remove(self._userData)
-            ThreadTime = [el for el in ThreadTime if self._userData not in el]
-            print("3.5")
-            driver.quit()
+            Processes.remove(self._userData)            
             print("4")
             
-        except:
-            driver.quit()
+        except Exception as e: 
+            print(e)
             Processes.remove(self._userData)
-            ThreadTime = [el for el in ThreadTime if self._userData not in el]
             print("6")
 
-
+    def downloadIcalThisWeek(self):
+        driver = self.startSelenium()
+        sel = '#dijit_layout__LayoutWidget_0 > section > div > div > div.un-flex-pane.un-flex-pane--fixed.un-timetable-page__header > div > form > div.float-right.btn-group > button:nth-child(1)'
+        WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel))).click()
+        start = time.time()
+        while self.proofDownloadCompleted() and time.time() - start < 50:
+            time.sleep(0.001)
+        driver.quit()
+        print("downloaded First Ical")
+        
+    def downloadIcalLastWeek(self):
+        driver = self.startSelenium()
+        sel = '#dijit_layout__LayoutWidget_0 > section > div > div > div.un-flex-pane.un-flex-pane--fixed.un-timetable-page__header > div > form > div.float-right.btn-group > button:nth-child(1)'
+        pageButtonBack = '#dijit_layout__LayoutWidget_0 > section > div > div > div.un-flex-pane.un-flex-pane--fixed.un-timetable-page__header > div > form > div.un-date-selector.form-group > span > span:nth-child(1) > button > i'
+        WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.CSS_SELECTOR, pageButtonBack))).click()
+        WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel))).click()
+        start = time.time()
+        while self.proofDownloadCompleted() and time.time() - start < 50:
+            time.sleep(0.001)
+        driver.quit()
+        print("downloaded Second Ical")
+    
+    def downloadIcalNextWeek(self):
+        driver = self.startSelenium()
+        sel = '#dijit_layout__LayoutWidget_0 > section > div > div > div.un-flex-pane.un-flex-pane--fixed.un-timetable-page__header > div > form > div.float-right.btn-group > button:nth-child(1)'
+        pageButtonForward = '#dijit_layout__LayoutWidget_0 > section > div > div > div.un-flex-pane.un-flex-pane--fixed.un-timetable-page__header > div > form > div.un-date-selector.form-group > span > span:nth-child(3) > button'
+        WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.CSS_SELECTOR, pageButtonForward))).click()
+        WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel))).click()
+        start = time.time()
+        while self.proofDownloadCompleted() and time.time() - start < 50:
+            time.sleep(0.001)
+        driver.quit()
+        print("downloaded Third Ical")
