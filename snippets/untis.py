@@ -85,7 +85,7 @@ class WebsiteUntis:
         self._options = webdriver.ChromeOptions()
         self._options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
         self._options.add_argument("--no-sandbox")
-        self._options.add_argument("--headless")
+        #self._options.add_argument("--headless")
         self._options.add_argument("--disable-dev-sh-usage")
         
         path =  "tmp/" #Current Directory
@@ -161,7 +161,7 @@ class WebsiteUntis:
         if not local:
             driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), chrome_options=self._options)
             
-        print("1")
+        print("Browser startet..")
         driver.set_window_position(0, 0)
         driver.set_window_size(1902, 768)
         
@@ -195,10 +195,10 @@ class WebsiteUntis:
                 t = Thread(target=func)
                 t.start()
                 threads.append(t)
-                
+            
             for th in threads:
                 th.join()
-                
+            
             print("Downloads beendet")
                 
             self._ical = Ical.Ical(self._filePath)
@@ -217,7 +217,7 @@ class WebsiteUntis:
         sel = '#dijit_layout__LayoutWidget_0 > section > div > div > div.un-flex-pane.un-flex-pane--fixed.un-timetable-page__header > div > form > div.float-right.btn-group > button:nth-child(1)'
         WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel))).click()
         start = time.time()
-        while self.proofDownloadCompleted() and time.time() - start < 50:
+        while self.proofDownloadCompleted():
             time.sleep(0.001)
         driver.quit()
         print("downloaded First Ical")
@@ -229,7 +229,7 @@ class WebsiteUntis:
         WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.CSS_SELECTOR, pageButtonBack))).click()
         WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel))).click()
         start = time.time()
-        while self.proofDownloadCompleted() and time.time() - start < 50:
+        while self.proofDownloadCompleted():
             time.sleep(0.001)
         driver.quit()
         print("downloaded Second Ical")
@@ -241,7 +241,7 @@ class WebsiteUntis:
         WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.CSS_SELECTOR, pageButtonForward))).click()
         WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel))).click()
         start = time.time()
-        while self.proofDownloadCompleted() and time.time() - start < 50:
+        while self.proofDownloadCompleted():
             time.sleep(0.001)
         driver.quit()
         print("downloaded Third Ical")
