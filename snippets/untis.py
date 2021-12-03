@@ -68,7 +68,7 @@ class Untis:
     "SELENIUM STUFF STARTS HERE"
 
 
-local = False
+local = False   
 class WebsiteUntis:
     
     Data = []
@@ -145,31 +145,39 @@ class WebsiteUntis:
     
 
     def _getChromeOptions(self, v):
+        print("options startet")
         options = webdriver.ChromeOptions()
         options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
         options.add_argument("--no-sandbox")
         if not local:
             options.add_argument("--headless")
-        options.add_argument("--headless")            
+        else:
+            options.add_argument("--headless")         
+               
         options.add_argument("--disable-dev-sh-usage")
-        
+        print("opt 1")
         path =  f"tmp/{v}" #Current Directory
         if local:
             path =   f"{os.getcwd()}\Ical_Files\{v}" #Current Directory
         
-            
+        print("opt 2")
         prefs = {"profile.default_content_settings.popups": 0,
             "download.default_directory": path,
             "directory_upgrade": True}
         options.add_experimental_option("prefs", prefs)
+        print("opt 3")
         return options
     
     def startSelenium(self, v):
+        print("sel start")
         options = self._getChromeOptions(v)
+        print("sel 1")
         driver = webdriver.Chrome(chrome_options=options)
+        print("sel 2")
         if not local:
             driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), chrome_options=options)
             
+        print("sel 3")
         print("Browser startet..")
         driver.set_window_position(0, 0)
         driver.set_window_size(1902, 768)
@@ -184,6 +192,7 @@ class WebsiteUntis:
         driver.refresh()
         WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.ID, 'embedded-webuntis')))
         driver.switch_to.frame('embedded-webuntis')
+        print("sel 4")
         return driver
         
     def stopSelenium(self, driver):
