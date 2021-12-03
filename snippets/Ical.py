@@ -8,8 +8,6 @@ class Ical:
         self._filePaths = []
         self._IcalStrings = []
         
-        print(f"{FilePath}first{FilePath[-1]}{FileName}")
-        
         if os.path.exists(f"{FilePath}first{FilePath[-1]}{FileName}"):
             self._filePaths.append(f"{FilePath}first{FilePath[-1]}{FileName}")
             
@@ -43,7 +41,3 @@ class Ical:
                     if element not in SubjectData:
                         SubjectData.append(element)     
         return SubjectData
-    
-if __name__ == '__main__':
-    i = Ical("Ical_Files\\", "KuhlmaMay.ics")
-    print(i.getSubjectData())
