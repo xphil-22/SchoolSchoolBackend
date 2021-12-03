@@ -150,13 +150,13 @@ class WebsiteUntis:
         options.add_argument("--no-sandbox")
         if not local:
             options.add_argument("--headless")
-        #options.add_argument("--headless")            
+        options.add_argument("--headless")            
         options.add_argument("--disable-dev-sh-usage")
         
         path =  f"tmp/{v}" #Current Directory
         if local:
             path =   f"{os.getcwd()}\Ical_Files\{v}" #Current Directory
-        print(path)
+        
             
         prefs = {"profile.default_content_settings.popups": 0,
             "download.default_directory": path,
@@ -226,7 +226,9 @@ class WebsiteUntis:
             print("6")
 
     def downloadIcalThisWeek(self):
+        print("download First Startet")
         driver = self.startSelenium("first")
+        print("first 1")
         sel = '#dijit_layout__LayoutWidget_0 > section > div > div > div.un-flex-pane.un-flex-pane--fixed.un-timetable-page__header > div > form > div.float-right.btn-group > button:nth-child(1)'
         WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel))).click()
         start = time.time()
@@ -236,7 +238,9 @@ class WebsiteUntis:
         print("downloaded First Ical")
         
     def downloadIcalLastWeek(self):
+        print("sec startet")
         driver = self.startSelenium("sec")
+        print("sec 2")
         sel = '#dijit_layout__LayoutWidget_0 > section > div > div > div.un-flex-pane.un-flex-pane--fixed.un-timetable-page__header > div > form > div.float-right.btn-group > button:nth-child(1)'
         pageButtonBack = '#dijit_layout__LayoutWidget_0 > section > div > div > div.un-flex-pane.un-flex-pane--fixed.un-timetable-page__header > div > form > div.un-date-selector.form-group > span > span:nth-child(1) > button > i'
         WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.CSS_SELECTOR, pageButtonBack))).click()
