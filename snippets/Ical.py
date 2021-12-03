@@ -1,26 +1,30 @@
 from django.core.files import File
 import os
+local = True
 class Ical:
     
-    def __init__(self, FilePath):
-        print(FilePath)
+    def __init__(self, FilePath, FileName): #name.ics  #tmp\ #ical\
+            
         self._filePaths = []
         self._IcalStrings = []
         
-        if os.path.exists(FilePath):
-            self._filePaths.append(FilePath)
+        print(f"{FilePath}first{FilePath[-1]}{FileName}")
+        
+        if os.path.exists(f"{FilePath}first{FilePath[-1]}{FileName}"):
+            self._filePaths.append(f"{FilePath}first{FilePath[-1]}{FileName}")
             
-        if os.path.exists(f"{FilePath[:-4]} (1).ics"):
-            self._filePaths.append(f"{FilePath[:-4]} (1).ics")
+        if os.path.exists(f"{FilePath}sec{FilePath[-1]}{FileName}"):
+            self._filePaths.append(f"{FilePath}sec{FilePath[-1]}{FileName}")
             
-        if os.path.exists(f"{FilePath[:-4]} (2).ics"):
-            self._filePaths.append(f"{FilePath[:-4]} (2).ics")
+        if os.path.exists(f"{FilePath}third{FilePath[-1]}{FileName}"):
+            self._filePaths.append(f"{FilePath}third{FilePath[-1]}{FileName}")
         
         for i in range(len(self._filePaths)):
             print(i)
             with open(self._filePaths[i], 'r') as f:
                 myFile = File(f)
                 self._IcalStrings.append(myFile.read())
+        
            
     def getSpecificData(self, key):
         komma = self._IcalString.find(':' , self._IcalString.find(key))+1
@@ -41,5 +45,5 @@ class Ical:
         return SubjectData
     
 if __name__ == '__main__':
-    i = Ical("Ical_Files\KuhlmaMay.ics")
+    i = Ical("Ical_Files\\", "KuhlmaMay.ics")
     print(i.getSubjectData())
