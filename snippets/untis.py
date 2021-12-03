@@ -128,7 +128,7 @@ class WebsiteUntis:
     def _setFilePath(self):
         name = self._username.replace('ss','ß').split('.')
         self._fileName = name[1][0:6].capitalize() + name[0][0:3].capitalize() + ".ics"
-        self._filePath = f"tmp/"
+        self._filePath = f"tmp/" #<<
         c = '/'
         if local:
             c = '\\'
@@ -156,7 +156,7 @@ class WebsiteUntis:
                
         options.add_argument("--disable-dev-sh-usage")
         print("opt 1")
-        path =  f"tmp/{v}" #Current Directory
+        path =  f"tmp/{v}/" #Current Directory   #<<<
         if local:
             path =   f"{os.getcwd()}\Ical_Files\{v}" #Current Directory
         
@@ -172,11 +172,14 @@ class WebsiteUntis:
         print("sel start")
         options = self._getChromeOptions(v)
         print("sel 1")
-        driver = webdriver.Chrome(chrome_options=options)
+        
         print("sel 2")
         if not local:
+            print("chrome options:", str(options))
             driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), chrome_options=options)
-            
+        else:
+            driver = webdriver.Chrome(chrome_options=options)
+               
         print("sel 3")
         print("Browser startet..")
         driver.set_window_position(0, 0)
@@ -202,7 +205,7 @@ class WebsiteUntis:
         c = '/'
         if local:
             c = '\\'
-        print(f"{self._filePath}{v}{c}{self._fileName}")
+        
         if os.path.exists(f"{self._filePath}{v}{c}{self._fileName}"):
             return False
         return True
