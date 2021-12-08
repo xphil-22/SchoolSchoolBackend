@@ -215,7 +215,7 @@ class WebsiteUntis:
     def getIcals(self, Data, Processes):
         try:
             print("2")
-            funcs = [self.downloadIcalThisWeek] #, self.downloadIcalLastWeek, self.downloadIcalNextWeek
+            funcs = [self.downloadIcalLastWeek, self.downloadIcalThisWeek, self.downloadIcalNextWeek] 
             threads = []
             print("3")
             for func in funcs:
@@ -235,6 +235,7 @@ class WebsiteUntis:
             print("4")
             
         except Exception as e: 
+            print("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeexxxxxxxxxxxxxxxxxxxxeeeeeeeeeeeeeeeeeeeeeptiooooooon")
             print(e)
             Processes.remove(self._userData)
             print("6")
@@ -245,7 +246,7 @@ class WebsiteUntis:
         print("first 1")
         sel = '#dijit_layout__LayoutWidget_0 > section > div > div > div.un-flex-pane.un-flex-pane--fixed.un-timetable-page__header > div > form > div.float-right.btn-group > button:nth-child(1)'
         WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel))).click()
-        start = time.time()
+      
         while self.proofDownloadCompleted("first"):
             time.sleep(0.001)
         driver.quit()
@@ -258,8 +259,9 @@ class WebsiteUntis:
         sel = '#dijit_layout__LayoutWidget_0 > section > div > div > div.un-flex-pane.un-flex-pane--fixed.un-timetable-page__header > div > form > div.float-right.btn-group > button:nth-child(1)'
         pageButtonBack = '#dijit_layout__LayoutWidget_0 > section > div > div > div.un-flex-pane.un-flex-pane--fixed.un-timetable-page__header > div > form > div.un-date-selector.form-group > span > span:nth-child(1) > button > i'
         WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.CSS_SELECTOR, pageButtonBack))).click()
+        time.sleep(0.5)
         WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel))).click()
-        start = time.time()
+    
         while self.proofDownloadCompleted("sec"):
             time.sleep(0.001)
         driver.quit()
@@ -270,8 +272,9 @@ class WebsiteUntis:
         sel = '#dijit_layout__LayoutWidget_0 > section > div > div > div.un-flex-pane.un-flex-pane--fixed.un-timetable-page__header > div > form > div.float-right.btn-group > button:nth-child(1)'
         pageButtonForward = '#dijit_layout__LayoutWidget_0 > section > div > div > div.un-flex-pane.un-flex-pane--fixed.un-timetable-page__header > div > form > div.un-date-selector.form-group > span > span:nth-child(3) > button'
         WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.CSS_SELECTOR, pageButtonForward))).click()
+        time.sleep(0.5)
         WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel))).click()
-        start = time.time()
+      
         while self.proofDownloadCompleted("third"):
             time.sleep(0.001)
         driver.quit()
