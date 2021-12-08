@@ -147,6 +147,7 @@ class WebsiteUntis:
         print("options startet")
         options = webdriver.ChromeOptions()
         options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
+        options.add_argument("--log-level=3")
         options.add_argument("--no-sandbox")
         if not local:
             options.add_argument("--headless")
@@ -173,6 +174,7 @@ class WebsiteUntis:
         print("sel 1")
         
         print("sel 2")
+        
         if not local:
             print("chrome options:", str(options))
             driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), chrome_options=options)
