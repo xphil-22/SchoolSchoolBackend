@@ -145,6 +145,7 @@ class mensaMeals(APIView):
     def get(self, request, format=None):
         return JsonResponse(mensaMeal.getMeals())
         
+#---------------------------------------------------------------------------------------------------------
 
 @api_view(['GET'])
 @permission_classes((IsAuthenticated, ))
