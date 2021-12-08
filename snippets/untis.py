@@ -196,7 +196,8 @@ class WebsiteUntis:
             
     def getIcals(self, Data, Processes):
         try:
-            funcs = [self.downloadIcalNextWeek, self.downloadIcalLastWeek, self.downloadIcalThisWeek]
+            print("2")
+            funcs = [self.downloadIcalLastWeek,self.downloadIcalNextWeek] 
             threads = []
             for func in funcs:
                 t = Thread(target=func)
