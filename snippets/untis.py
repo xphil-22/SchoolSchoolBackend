@@ -176,7 +176,7 @@ class WebsiteUntis:
         if not local:
             print("chrome options:", str(options))
             driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), chrome_options=options)
-        else:
+        if local:
             driver = webdriver.Chrome(chrome_options=options)
                
         print("sel 3")
@@ -213,7 +213,7 @@ class WebsiteUntis:
     def getIcals(self, Data, Processes):
         try:
             print("2")
-            funcs = [self.downloadIcalThisWeek, self.downloadIcalLastWeek, self.downloadIcalNextWeek]
+            funcs = [self.downloadIcalThisWeek] #, self.downloadIcalLastWeek, self.downloadIcalNextWeek
             threads = []
             print("3")
             for func in funcs:
