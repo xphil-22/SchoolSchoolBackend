@@ -4,7 +4,6 @@ import datetime
 import json
 import ast
 import time
-import json
 #SELENIUM IMPORTS
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -68,7 +67,7 @@ class Untis:
     "SELENIUM STUFF STARTS HERE"
 
 
-local = False   
+local = True   
 class WebsiteUntis:
     
     Data = []
@@ -186,6 +185,7 @@ class WebsiteUntis:
         driver.set_window_size(1902, 768)
         
         driver.get("https://terpsichore.webuntis.com/WebUntis/?school=RFGS-Freiburg#/basic/login")
+        WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, 'un-input-group__input')))
         input_fields = driver.find_elements(By.CLASS_NAME, 'un-input-group__input')
         input_fields[0].send_keys(self._username)
         input_fields[1].send_keys(self._password)

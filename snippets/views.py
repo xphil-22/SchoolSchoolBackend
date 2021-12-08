@@ -23,7 +23,7 @@ from rest_framework.response import Response
 from rest_framework.exceptions import APIException
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 import json
-from snippets import untis
+from snippets import untis, mensaMeal
 
 # Create your views here.
 
@@ -138,6 +138,14 @@ class changeLoginData(APIView):
                  raise APIException("Wrong credentials")
              
 #---------------------------------------------------------------------------------------------------------
+class mensaMeals(APIView):
+    authentication_classes = [TokenAuthentication, SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request, format=None):
+        return JsonResponse(mensaMeal.getMeals())
+        
+
 @api_view(['GET'])
 @permission_classes((IsAuthenticated, ))
 @authentication_classes((TokenAuthentication, SessionAuthentication))
@@ -162,7 +170,8 @@ def webuntis(request):
         else:
             return JsonResponse({"data": "Wrong Webuntis credentials in Database, maybe you have to change your Login Data via: 'webuntis/changeLoginData'"})
     
-
+    
+    
     if request.GET.get('classes') == 'all':
         u = untis.Untis()
         loggedIn = u.newSession(username, password)
