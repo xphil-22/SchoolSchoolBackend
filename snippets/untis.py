@@ -67,12 +67,11 @@ class Untis:
     "SELENIUM STUFF STARTS HERE"
 
 
-local = False   
+local = False
 class WebsiteUntis:
     
     Data = []
     Threads = []
-    ThreadTime = []
     
     def __init__(self, username, password):
         self._ical = 0
@@ -85,12 +84,10 @@ class WebsiteUntis:
 
     
     def getWebSubjects(self):
-        print(WebsiteUntis.Threads, WebsiteUntis.Data)
         
         if self._userData not in WebsiteUntis.Threads and not self.proofData():
             self._setFilePath()
             WebsiteUntis.Threads.append(self._userData)
-            WebsiteUntis.ThreadTime.append({self._userData : time.time()})
             t = Thread(target=self.getIcals, args=(WebsiteUntis.Data, WebsiteUntis.Threads))
             t.start()
             return {"done": 2}
@@ -101,8 +98,6 @@ class WebsiteUntis:
         if self.proofData():
             data = [el[self._userData] for el in WebsiteUntis.Data if self._userData in el]
             WebsiteUntis.Data = [el for el in WebsiteUntis.Data if self._userData not in el]
-            WebsiteUntis.ThreadTime = [el for el in WebsiteUntis.ThreadTime if self._userData not in el]
-            
             return {"done":0, "Subjects":data[0]}
 
         else:
@@ -119,7 +114,6 @@ class WebsiteUntis:
         for el in WebsiteUntis.ThreadTime:
             for ThreadName in el:
                 StartTime = el[ThreadName]
-                print(now - StartTime)
                 if now - StartTime > self._ScrapingWaitTime:
                     WebsiteUntis.Threads.remove(self._userData)
                     WebsiteUntis.ThreadTime = [el for el in WebsiteUntis.ThreadTime if self._userData not in el]
@@ -144,7 +138,6 @@ class WebsiteUntis:
     
 
     def _getChromeOptions(self, v):
-        print("options startet")
         options = webdriver.ChromeOptions()
         options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
         options.add_argument("--log-level=3")
@@ -155,34 +148,24 @@ class WebsiteUntis:
             options.add_argument("--headless")         
                
         options.add_argument("--disable-dev-sh-usage")
-        print("opt 1")
         path =  f"tmp/{v}/" #Current Directory   #<<<
         if local:
             path =   f"{os.getcwd()}\Ical_Files\{v}" #Current Directory
         
-        print("opt 2")
         prefs = {"profile.default_content_settings.popups": 0,
             "download.default_directory": path,
             "directory_upgrade": True}
         options.add_experimental_option("prefs", prefs)
-        print("opt 3")
         return options
     
     def startSelenium(self, v):
-        print("sel start")
         options = self._getChromeOptions(v)
-        print("sel 1")
-        
-        print("sel 2")
         
         if not local:
-            print("chrome options:", str(options))
             driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), chrome_options=options)
         if local:
             driver = webdriver.Chrome(chrome_options=options)
                
-        print("sel 3")
-        print("Browser startet..")
         driver.set_window_position(0, 0)
         driver.set_window_size(1902, 768)
         
@@ -197,7 +180,6 @@ class WebsiteUntis:
         driver.refresh()
         WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.ID, 'embedded-webuntis')))
         driver.switch_to.frame('embedded-webuntis')
-        print("sel 4")
         return driver
         
     def stopSelenium(self, driver):
@@ -214,10 +196,8 @@ class WebsiteUntis:
             
     def getIcals(self, Data, Processes):
         try:
-            print("2")
-            funcs = [self.downloadIcalLastWeek, self.downloadIcalThisWeek, self.downloadIcalNextWeek] 
+            funcs = [self.downloadIcalNextWeek, self.downloadIcalLastWeek, self.downloadIcalThisWeek]
             threads = []
-            print("3")
             for func in funcs:
                 t = Thread(target=func)
                 t.start()
@@ -226,56 +206,52 @@ class WebsiteUntis:
             for th in threads:
                 th.join()
             
-            print("Downloads beendet")
                 
             self._ical = Ical.Ical(self._filePath, self._fileName)
             data = self._ical.getSubjectData()
             Data.append({self._userData : data})
-            Processes.remove(self._userData)            
-            print("4")
+            Processes.remove(self._userData)       
             
         except Exception as e: 
             print("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeexxxxxxxxxxxxxxxxxxxxeeeeeeeeeeeeeeeeeeeeeptiooooooon")
             print(e)
             Processes.remove(self._userData)
-            print("6")
 
     def downloadIcalThisWeek(self):
-        print("download First Startet")
         driver = self.startSelenium("first")
-        print("first 1")
         sel = '#dijit_layout__LayoutWidget_0 > section > div > div > div.un-flex-pane.un-flex-pane--fixed.un-timetable-page__header > div > form > div.float-right.btn-group > button:nth-child(1)'
         WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel))).click()
       
         while self.proofDownloadCompleted("first"):
             time.sleep(0.001)
         driver.quit()
-        print("downloaded First Ical")
         
     def downloadIcalLastWeek(self):
-        print("sec startet")
-        driver = self.startSelenium("sec")
-        print("sec 2")
-        sel = '#dijit_layout__LayoutWidget_0 > section > div > div > div.un-flex-pane.un-flex-pane--fixed.un-timetable-page__header > div > form > div.float-right.btn-group > button:nth-child(1)'
-        pageButtonBack = '#dijit_layout__LayoutWidget_0 > section > div > div > div.un-flex-pane.un-flex-pane--fixed.un-timetable-page__header > div > form > div.un-date-selector.form-group > span > span:nth-child(1) > button > i'
-        WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.CSS_SELECTOR, pageButtonBack))).click()
-        time.sleep(0.5)
-        WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel))).click()
-    
-        while self.proofDownloadCompleted("sec"):
-            time.sleep(0.001)
-        driver.quit()
-        print("downloaded Second Ical")
+        try:
+            driver = self.startSelenium("sec")
+            sel = '#dijit_layout__LayoutWidget_0 > section > div > div > div.un-flex-pane.un-flex-pane--fixed.un-timetable-page__header > div > form > div.float-right.btn-group > button:nth-child(1)'
+            pageButtonBack = '#dijit_layout__LayoutWidget_0 > section > div > div > div.un-flex-pane.un-flex-pane--fixed.un-timetable-page__header > div > form > div.un-date-selector.form-group > span > span:nth-child(1) > button > i'
+            WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.CSS_SELECTOR, pageButtonBack))).click()
+            time.sleep(0.5)
+            WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel))).click()
+        
+            while self.proofDownloadCompleted("sec"):
+                time.sleep(0.001)
+            driver.quit()
+        except:
+            print("downloadIcalLastWeek exception")
     
     def downloadIcalNextWeek(self):
-        driver = self.startSelenium("third")
-        sel = '#dijit_layout__LayoutWidget_0 > section > div > div > div.un-flex-pane.un-flex-pane--fixed.un-timetable-page__header > div > form > div.float-right.btn-group > button:nth-child(1)'
-        pageButtonForward = '#dijit_layout__LayoutWidget_0 > section > div > div > div.un-flex-pane.un-flex-pane--fixed.un-timetable-page__header > div > form > div.un-date-selector.form-group > span > span:nth-child(3) > button'
-        WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.CSS_SELECTOR, pageButtonForward))).click()
-        time.sleep(0.5)
-        WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel))).click()
-      
-        while self.proofDownloadCompleted("third"):
-            time.sleep(0.001)
-        driver.quit()
-        print("downloaded Third Ical")
+        try:
+            driver = self.startSelenium("third")
+            sel = '#dijit_layout__LayoutWidget_0 > section > div > div > div.un-flex-pane.un-flex-pane--fixed.un-timetable-page__header > div > form > div.float-right.btn-group > button:nth-child(1)'
+            pageButtonForward = '#dijit_layout__LayoutWidget_0 > section > div > div > div.un-flex-pane.un-flex-pane--fixed.un-timetable-page__header > div > form > div.un-date-selector.form-group > span > span:nth-child(3) > button'
+            WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.CSS_SELECTOR, pageButtonForward))).click()
+            time.sleep(0.5)
+            WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.CSS_SELECTOR, sel))).click()
+        
+            while self.proofDownloadCompleted("third"):
+                time.sleep(0.001)
+            driver.quit()
+        except:
+            print("downloadIcalNextWeek exception")
