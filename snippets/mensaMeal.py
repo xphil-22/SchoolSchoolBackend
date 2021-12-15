@@ -1,73 +1,82 @@
 import requests
 from lxml import etree
 from bs4 import BeautifulSoup
+from datetime import datetime
 
 
-# making a meal class in order to save the meal information
+url = "https://www.swfr.de/essen-trinken/speiseplaene/mensa-institutsviertel/"
+day_acronyms = ["mon", "tue", "wed", "thu", "fri"]
 
 class Meal:
-    def __init__(self, name:str, main_dish:str, supplement:str, garnish:str, cost_students:str, cost_teachers:str, cost_visitors:str):
+    def __init__(self, name:str, main_dish:str, cost_students:str, cost_teachers:str, cost_visitors:str, allergents:str, *remaining_info):
         self.name = name
         self.main_dish = main_dish
-        self.supplement = supplement
-        self.garnish = garnish
         self.cost_students = cost_students
         self.cost_teachers = cost_teachers
         self.cost_visitors = cost_visitors
-    
-    def getMeal(self):
-        return  [
-                    {"name":self.name},
-                    {"main_dish":self.main_dish},
-                    {"supplement":self.supplement},
-                    {"garnish":self.garnish},
-                    {"cost_students":self.cost_students},
-                    {"cost_teachers":self.cost_teachers},
-                    {"cost_visitors":self.cost_visitors},
-                ]
+        self.allergents = allergents
+        self.remaining_info = remaining_info
+
+    def getMealDetails(self):
+        return[
+            {"name":self.name},
+            {"main_dish":self.main_dish},
+            {"cost_students":self.cost_students},
+            {"cost_students":self.cost_students},
+            {"cost_teachers":self.cost_teachers},
+            {"cost_visitors":self.cost_visitors},
+            {"allergents":self.allergents},
+            {"remaining_info":self.remaining_info},
+        ]
     
     def __str__(self) -> str:
-        return f"{self.name}\n {self.main_dish}\n {self.supplement}\n {self.garnish}\n kostet: {self.cost_students}"
+        temp = '\n '.join([i for i in self.remaining_info]) # have to do this, '\' is not possible in {expression} part of f-strings
+        return f"{self.name}\n {self.main_dish}\n {temp}\n {self.allergents}\n {self.cost_students}"
 
-
+class Day:
+    def __init__(self, date:str, meals:list[Meal]) -> None:
+        self.date = date
+        self.meals = meals
+    
+    def getMealOfDay(self):
+        return {"meals": 
+                    [
+                        {"date":self.date},
+                        {"meals" : [m.getMealDetails() for m in self.meals]}
+                    ]
+                }
+    
 def getMeals():
-    # define the url and the xpath for the right div to get the data from
-    url = "https://www.swfr.de/essen-trinken/speiseplaene/mensa-institutsviertel/"
-    xpath = "/html/body/div[2]/div/div[1]/div[6]/div[1]/div[3]/div[2]"
-
-    # making the request and parsing it to a dom
     r = requests.get(url)
+
     soup = BeautifulSoup(r.text, features="lxml")
-    dom = etree.HTML(str(soup))
+    html = etree.HTML(str(soup))
+
+    days = []
+
+    def get_day(day_acronym):
+        day_data = html.xpath(f"//*[@id=\"tab-{day_acronym}\"]")[0]
+
+        date = ""
+        meals = []
+
+        for element in day_data:
+            if element.tag == "h3":
+                date = element.text
+            else:
+                data = list(element.itertext())
+                meal = Meal(data[0], data[1].lstrip(), data[-5], data[-3], data[-1], data[-7], *data[2:-7])
+                meals.append(meal)
+        return date, meals[0:-1] # [0:-1] filters out Buffets, because they are still broken
+
+    for day_acronym in day_acronyms: # loop through each day, to get only one day just use get_day("mon") for monday
+        days.append(Day(*get_day(day_acronym)))
 
 
-    # using xpath to get to the right part of the dom
-    dom_at_xpath = dom.xpath(xpath)[0]
+    def getNextMealWeekday():
+        today = datetime.today().weekday()
+        if today > 4:
+            return 0
+        return today
 
-    # traversing the dom to collect the data and saving it in an array of meals
-    meals = []
-
-    for part in dom_at_xpath:
-        if part.tag == "div":
-            iter_tags = ["div", "tr", "table"]
-            tail_tags = ["br"]
-            text_tags = ["span", "h4", "td"]
-            data = []
-
-            def p(part_of_dom):
-                for element in part_of_dom:
-                    if element.tag in iter_tags:
-                        p(element)
-                    elif element.tag in tail_tags:
-                        data.append(element.tail)
-                    elif element.tag in text_tags:
-                        data.append(element.text)
-
-            p(part)
-            meals.append(Meal(data[0], data[1], data[2], data[3], data[8], data[10], data[12]))
-            
-    jsonMeals = []
-    for meal in meals:
-        jsonMeals.append(meal.getMeal())
-
-    return {"meals":jsonMeals}
+    return days[getNextMealWeekday()].getMealOfDay()
