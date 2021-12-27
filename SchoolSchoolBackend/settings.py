@@ -9,8 +9,9 @@ https://docs.djangoproject.com/en/3.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
-import os
+import os, sys
 from pathlib import Path
+
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -30,12 +31,14 @@ ALLOWED_HOSTS = ['127.0.0.1','schoolschooli.herokuapp.com','schoolschoolitest.he
 
 
 # Application definition
+sys.path.insert(0, os.path.join(BASE_DIR, 'apps'))
 
 INSTALLED_APPS = [
-
+    
     'rest_framework',
     'allauth.socialaccount',
     'snippets.apps.SnippetsConfig',
+    'administration.apps.AdministrationConfig',
     'rest_framework.authtoken',
     'rest_auth',
     'django.contrib.sites',
