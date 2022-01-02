@@ -7,7 +7,8 @@ from rest_framework.authentication import SessionAuthentication, TokenAuthentica
 from rest_framework.response import Response
 from rest_framework.exceptions import APIException
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
-from untis import untis
+from untis.scripts.Webuntis import WebsiteUntis
+from untis.scripts.UntisAPI import UntisAPI
 
 # Create your views here.
 
@@ -19,7 +20,7 @@ class WebUntisLogin(APIView):
     def post(self, request, format=None):
         Raw_Data = request.data
         if (Raw_Data['username'] and Raw_Data['password']) != None:
-            u = untis.Untis()
+            u = UntisAPI()
             if u.newSession(Raw_Data['username'], Raw_Data['password']):  
                 self.request.user.profile.untisUsername = Raw_Data['username'] 
                 self.request.user.profile.untisPassword = Raw_Data['password']
@@ -36,7 +37,7 @@ class changePassword(APIView):
     def post(self, request, format=None):
         Raw_Data = request.data
         if (Raw_Data['username'] and Raw_Data['password']) != None:
-            u = untis.Untis()
+            u = UntisAPI()
             if u.newSession(Raw_Data['username'], Raw_Data['password']):  
                 self.request.user.profile.untisUsername = Raw_Data['username'] 
                 self.request.user.profile.untisPassword = Raw_Data['password']
@@ -61,15 +62,11 @@ def webuntis(request):
         return JsonResponse({"data":"You have to Login first"})
      
     if request.GET.get('subjects') == "":
-        u = untis.Untis()
-        loggedIn = u.newSession(username, password)
-        if loggedIn:
-            web = untis.WebsiteUntis(username, password)
-            return JsonResponse(web.getWebSubjects())
+        webuntis = WebsiteUntis(request.user.profile)
+        if webuntis.Login():
+            return JsonResponse(webuntis.getWebSubjects())
         else:
-            return JsonResponse({"data": "Wrong Webuntis credentials in Database, maybe you have to change your Login Data via: 'webuntis/changeLoginData'"})
-    
-    
+            return JsonResponse({"data": "Wrong Webuntis credentials in Database, maybe you have to change your Login Data via: 'webuntis/changeLoginData'"})   
     
     if request.GET.get('classes') == 'all':
         u = untis.Untis()

@@ -5,9 +5,7 @@ from rest_framework import status, mixins, generics
 from rest_framework.response import Response
 from SchoolSchoolBackend.permissions import IsAdminOrCreator, SnippetListPermission
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
-
 # Create your views here.
-
 
 class SnippetList(mixins.ListModelMixin, mixins.CreateModelMixin, generics.GenericAPIView):
     

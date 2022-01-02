@@ -45,9 +45,6 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'rest_auth.registration',
-    
-
-
  
     'django.contrib.admin',
     'django.contrib.auth',
