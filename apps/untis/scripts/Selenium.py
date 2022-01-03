@@ -65,12 +65,16 @@ class Selenium:
         
         
     def downloadThisWeek(self):
-        self.start()
-        WebDriverWait(self._driver, 30).until(EC.presence_of_element_located((By.CSS_SELECTOR, self._selector))).click()
-      
-        while self.proofDownloadCompleted():
-            time.sleep(0.001)
-        self.stopSelenium()
+        try:
+            self.start()
+            WebDriverWait(self._driver, 30).until(EC.presence_of_element_located((By.CSS_SELECTOR, self._selector))).click()
+        
+            while self.proofDownloadCompleted():
+                time.sleep(0.001)
+            self.stopSelenium()
+        except Exception as e:
+            self.stopSelenium()
+            print("downalodThisWeekException: ", e)
     
     def downloadNextWeek(self):
         try:
@@ -85,8 +89,10 @@ class Selenium:
                 
             self.stopSelenium()
             
-        except:
-            print("downloadIcalNextWeek exception")
+        except Exception as e:
+            self.stopSelenium()
+            print("downloadIcalNextWeek exception: ", e)
+           
             
     def downloadLastWeek(self):
         try:
@@ -95,22 +101,19 @@ class Selenium:
             WebDriverWait(self._driver, 30).until(EC.presence_of_element_located((By.CSS_SELECTOR, pageButtonBack))).click()
             time.sleep(0.5)
             WebDriverWait(self._driver, 30).until(EC.presence_of_element_located((By.CSS_SELECTOR, self._selector))).click()
-            print("yyyyyyyyyyy")
             while self.proofDownloadCompleted():
                 time.sleep(0.001)
-            print("xxxxxxxxxxxxxxxxxxxxxxxxx")
             self.stopSelenium()
-        except:
-            print("downloadIcalLastWeek exception")
+        except Exception as e:
+            self.stopSelenium()
+            print("downloadIcalLastWeek exception: ", e)
         
     def proofDownloadCompleted(self):
         c = '/'
         if local:
             c = '\\'
-        print("rrrrrr")
         print(f"{self._filePath}{self._v}{c}{self._fileName}")
         if os.path.exists(f"{self._filePath}{self._v}{c}{self._fileName}"):
             return False
-        print("bbbbbbbb")
         return True
         

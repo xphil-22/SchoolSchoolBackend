@@ -43,11 +43,8 @@ class Ical:
         threads = []
         
         for func in funcs:
-            print("xxxxxxx")
             t = Thread(target=func)
-            print("yyyy")
             t.start()
-            print('zzzz')
             threads.append(t)
         
         for th in threads:
@@ -69,7 +66,6 @@ class Ical:
             self._filePaths.append(f"{self._filePath}ThisWeek{self._filePath[-1]}{self._fileName}")
         
         for i in range(len(self._filePaths)):
-            print(i)
             with open(self._filePaths[i], 'r') as f:
                 myFile = File(f)
                 self._IcalStrings.append(myFile.read())
