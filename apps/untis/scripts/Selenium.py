@@ -5,10 +5,11 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 from untis.scripts.Thread import Thread
+from SchoolSchoolBackend.settings import LOCAL as local
 import os
 import time
 
-local = True #To set the differences between Local Variables and Server Variables
+
 
 class Selenium:
     
@@ -31,7 +32,7 @@ class Selenium:
         path =  f"tmp/{self._v}/" #Current Directory
         if local:
             path =   f"{os.getcwd()}\\apps\\untis\\Ical_Files\\{self._v}" #Current Server Directory
-        
+        print("download Path: ", path)
         prefs = {"profile.default_content_settings.popups": 0,
             "download.default_directory": path,
             "directory_upgrade": True}
@@ -107,7 +108,7 @@ class Selenium:
         if local:
             c = '\\'
         print("rrrrrr")
-        print(f"{self._filePath}")
+        print(f"{self._filePath}{self._v}{c}{self._fileName}")
         if os.path.exists(f"{self._filePath}{self._v}{c}{self._fileName}"):
             return False
         print("bbbbbbbb")

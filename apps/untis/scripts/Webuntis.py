@@ -2,7 +2,7 @@ import os
 from untis.scripts.Thread import Thread 
 from untis.scripts.UntisAPI import UntisAPI
 from untis.scripts.Ical import Ical
-local = False #To set the differences between Local Variables and Server Variables
+from SchoolSchoolBackend.settings import LOCAL as local
 
 class WebsiteUntis:
     
@@ -51,7 +51,8 @@ class WebsiteUntis:
         self._fileName = name[1][0:6].capitalize() + name[0][0:3].capitalize() + ".ics"
         self._filePath = "tmp/" 
         c = '/'
-        if Ical.local:
+        print("local: ", local)
+        if local:
             c = '\\'
             self._filePath = "apps\\untis\\Ical_Files\\"
             

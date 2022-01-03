@@ -4,10 +4,7 @@ from untis.scripts.Thread import Thread
 import os
 
 
-
 class Ical:
-    
-    local = False
     
     def __init__(self, filePath, fileName, profile):
         self._filePath = filePath
