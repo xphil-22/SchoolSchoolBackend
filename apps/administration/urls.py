@@ -4,7 +4,7 @@ from administration import views
 from django.contrib import admin
 #Urls that are linking to the specific Class-Based-View or Function-Based-View
 
-urlpatterns = [
+urlpatterns = [ #Interface to link to the right View
     path('admin/', admin.site.urls),
     path('users/', views.UserList.as_view()),
     path('users/<int:pk>/', views.UserDetail.as_view()),
