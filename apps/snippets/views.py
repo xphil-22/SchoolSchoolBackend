@@ -9,16 +9,16 @@ from rest_framework.authentication import SessionAuthentication, TokenAuthentica
 
 class SnippetList(mixins.ListModelMixin, mixins.CreateModelMixin, generics.GenericAPIView):
     
-    authentication_classes = [TokenAuthentication, SessionAuthentication]
+    authentication_classes = [TokenAuthentication, SessionAuthentication] #Authentification allowed with Session or Token Auth
     permission_classes = [SnippetListPermission] #Normal User is allowed to do a POST, Admin can do anything (including get)
                                                  #SnippetListPermission is written in 'SchoolSchoolBackend/permissions' file
     queryset = Snippet.objects.all()
     serializer_class = SnippetSerializer
     
-    def get(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs): #Get request -> return the users list
         return self.list(request, *args, **kwargs)
 
-    def post(self, request, format=None):
+    def post(self, request, format=None): #post -> save snippet and the snippet id. 
         if not self.request.user.profile.snippetID:
             serializer = SnippetSerializer(data=request.data)
             if serializer.is_valid():
@@ -37,8 +37,8 @@ class SnippetList(mixins.ListModelMixin, mixins.CreateModelMixin, generics.Gener
 class SnippetDetail(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, generics.GenericAPIView):
     #Normal User should is allowed to see and change the snippet if he is the creator
                                          
-    permission_classes = [IsAdminOrCreator]
-    authentication_classes = [TokenAuthentication, SessionAuthentication]
+    permission_classes = [IsAdminOrCreator] #Acces for Admin or the creator of the snippet
+    authentication_classes = [TokenAuthentication, SessionAuthentication] #Authentification allowed with Session or Token Auth
     
     queryset = Snippet.objects.all()
     serializer_class = SnippetSerializer

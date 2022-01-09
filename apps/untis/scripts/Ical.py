@@ -6,21 +6,21 @@ import os
 
 class Ical:
     
-    def __init__(self, filePath, fileName, profile):
-        self._filePath = filePath
-        self._fileName = fileName
-        self._Profile = profile
-        self._icals = ['ThisWeek', 'LastWeek','NextWeek']
+    def __init__(self, filePath:str, fileName:str, profile:list[str]):
+        self._filePath:str = filePath
+        self._fileName:str = fileName
+        self._Profile:list[str] = profile
+        self._icals:list[str] = ['ThisWeek', 'LastWeek','NextWeek']
         
-        self._filePaths = []
-        self._IcalStrings = []
+        self._filePaths:list[str] = []
+        self._IcalStrings:list[str] = []
         
            
-    def getSpecificData(self, key):
+    def getSpecificData(self, key:str) -> list:
         komma = self._IcalString.find(':' , self._IcalString.find(key))+1
         return self._IcalString[komma: self._IcalString.find('\n', komma)]
 
-    def _getSubjectData(self):
+    def _getSubjectData(self) -> list:
         SubjectData = []
         for i in range(len(self._filePaths)):
             arr = self._IcalStrings[i].split('\n')
@@ -34,7 +34,7 @@ class Ical:
                         SubjectData.append(element)     
         return SubjectData
     
-    def getIcals(self):
+    def getIcals(self) -> list:
         sel = []
         for ical in self._icals:
             sel.append(Selenium(ical, self._Profile, self._fileName, self._filePath))
@@ -55,7 +55,7 @@ class Ical:
         return data     
 
             
-    def _readIcals(self):
+    def _readIcals(self) -> None:
         if os.path.exists(f"{self._filePath}NextWeek{self._filePath[-1]}{self._fileName}"):
                 self._filePaths.append(f"{self._filePath}NextWeek{self._filePath[-1]}{self._fileName}")
             

@@ -7,9 +7,9 @@ import time
 
 class UntisAPI:
     def __init__(self):
-        self._session = 0   #Session Object
+        self._session:webuntis.session = 0   #Session Object
         
-    def newSession(self, username, password): #Start a new Seesion and return if Session is valid (Credentials correct)
+    def newSession(self, username:str, password:str) -> bool: #Start a new Seesion and return if Session is valid (Credentials correct)
         try:
             s = webuntis.Session(
                 server='https://terpsichore.webuntis.com',
@@ -25,10 +25,10 @@ class UntisAPI:
         except:
             return False
 
-    def getAllClasses(self):
+    def getAllClasses(self) -> webuntis.objects.KlassenList: #return all classes of school 
         return self._session.klassen()
     
-    def getSubjectsOfClass(self, className):
+    def getSubjectsOfClass(self, className:str) -> webuntis.objects.SubjectList: #get all Subjects of the given class
         today = datetime.date.today()
         monday = today - datetime.timedelta(days=today.weekday())
         friday = monday + datetime.timedelta(days=6)

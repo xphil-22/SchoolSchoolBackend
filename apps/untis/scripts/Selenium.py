@@ -8,19 +8,16 @@ from untis.scripts.Thread import Thread
 from SchoolSchoolBackend.settings import LOCAL as local
 import os
 import time
-
-
-
 class Selenium:
     
-    def __init__(self, ver:str, profile:list[str], fileName, filePath):
-        self._filePath = filePath
-        self._fileName = fileName
-        self._profile = profile
-        self._driver = None
-        self._args = ["--log-level=3", "--no-sandbox", "--disable-dev-sh-usage", "--headless"]
-        self._v = ver
-        self._selector = '#dijit_layout__LayoutWidget_0 > section > div > div > div.un-flex-pane.un-flex-pane--fixed.un-timetable-page__header > div > form > div.float-right.btn-group > button:nth-child(1)'
+    def __init__(self, ver:str, profile:list[str], fileName:str, filePath:str):
+        self._filePath:str = filePath
+        self._fileName:str = fileName
+        self._profile:list[str] = profile
+        self._driver:webdriver = None
+        self._args:list[str] = ["--log-level=3", "--no-sandbox", "--disable-dev-sh-usage", "--headless"]
+        self._v:str = ver
+        self._selector:str = '#dijit_layout__LayoutWidget_0 > section > div > div > div.un-flex-pane.un-flex-pane--fixed.un-timetable-page__header > div > form > div.float-right.btn-group > button:nth-child(1)'
         
     def _getChromeOptions(self):
         options = webdriver.ChromeOptions()
@@ -40,7 +37,7 @@ class Selenium:
         options.add_experimental_option("prefs", prefs)
         return options
     
-    def start(self):
+    def start(self) -> None:
         if not local:
             self._driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), chrome_options=self._getChromeOptions())
         else:
@@ -60,11 +57,11 @@ class Selenium:
         WebDriverWait(self._driver, 30).until(EC.presence_of_element_located((By.ID, 'embedded-webuntis')))
         self._driver.switch_to.frame('embedded-webuntis')
     
-    def stopSelenium(self):
+    def stopSelenium(self) -> None:
         self._driver.quit()
         
         
-    def downloadThisWeek(self):
+    def downloadThisWeek(self) -> None:
         try:
             self.start()
             WebDriverWait(self._driver, 30).until(EC.presence_of_element_located((By.CSS_SELECTOR, self._selector))).click()
@@ -76,7 +73,7 @@ class Selenium:
             self.stopSelenium()
             print("downalodThisWeekException: ", e)
     
-    def downloadNextWeek(self):
+    def downloadNextWeek(self) -> None:
         try:
             self.start()
             pageButtonForward = '#dijit_layout__LayoutWidget_0 > section > div > div > div.un-flex-pane.un-flex-pane--fixed.un-timetable-page__header > div > form > div.un-date-selector.form-group > span > span:nth-child(3) > button'
@@ -94,7 +91,7 @@ class Selenium:
             print("downloadIcalNextWeek exception: ", e)
            
             
-    def downloadLastWeek(self):
+    def downloadLastWeek(self) -> None:
         try:
             self.start()
             pageButtonBack = '#dijit_layout__LayoutWidget_0 > section > div > div > div.un-flex-pane.un-flex-pane--fixed.un-timetable-page__header > div > form > div.un-date-selector.form-group > span > span:nth-child(1) > button > i'
@@ -108,7 +105,7 @@ class Selenium:
             self.stopSelenium()
             print("downloadIcalLastWeek exception: ", e)
         
-    def proofDownloadCompleted(self):
+    def proofDownloadCompleted(self) -> bool:
         c = '/'
         if local:
             c = '\\'
