@@ -13,13 +13,12 @@ class Day:
         else:
             for element in day_data:
                 if element.tag == "h3":
-                    self._date = element.text
-                if element.tag == "h4":
-                    print("xxxxxxxxxxxxxxxxxxxx", element.text)    
+                    self._date = element.text 
                 
                 else:
                     data = list(element.itertext())
-
+                    print(data)
+                        
                     meal = Meal(data[0], data[1].lstrip(), data[-5], data[-3], data[-1], data[-7], *data[2:-7])
                     self._meals.append(meal)
                 
