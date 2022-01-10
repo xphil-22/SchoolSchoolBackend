@@ -71,6 +71,10 @@ class WebsiteUntis:
         try:
             ical = Ical(self._filePath, self._fileName, self._profile)
             data = ical.getIcals()
+            if data == []:
+                self._setFilePath()
+                self._getIcals(Data, Processes)
+                
             print("Trueeeeeeeeeeee")
             Data.append({self._username : data})
             print(data)

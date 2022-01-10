@@ -15,7 +15,7 @@ class Selenium:
         self._fileName:str = fileName
         self._profile:list[str] = profile
         self._driver:webdriver = None
-        self._args:list[str] = ["--log-level=3", "--no-sandbox", "--disable-dev-sh-usage", "--headless"]
+        self._args:list[str] = ["--log-level=3", "--no-sandbox", "--disable-dev-sh-usage", "--headless"] 
         self._v:str = ver
         self._selector:str = '#dijit_layout__LayoutWidget_0 > section > div > div > div.un-flex-pane.un-flex-pane--fixed.un-timetable-page__header > div > form > div.float-right.btn-group > button:nth-child(1)'
         
@@ -70,7 +70,6 @@ class Selenium:
                 time.sleep(0.001)
             self.stopSelenium()
         except Exception as e:
-            self.stopSelenium()
             print("downalodThisWeekException: ", e)
     
     def downloadNextWeek(self) -> None:
@@ -87,7 +86,6 @@ class Selenium:
             self.stopSelenium()
             
         except Exception as e:
-            self.stopSelenium()
             print("downloadIcalNextWeek exception: ", e)
            
             
@@ -102,7 +100,6 @@ class Selenium:
                 time.sleep(0.001)
             self.stopSelenium()
         except Exception as e:
-            self.stopSelenium()
             print("downloadIcalLastWeek exception: ", e)
         
     def proofDownloadCompleted(self) -> bool:
