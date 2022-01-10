@@ -32,11 +32,13 @@ class WebsiteUntis:
         if self._username in WebsiteUntis.Threads and not self.proofData(): #if thread is started but the downloads aren't finished yet, the server return done:1
             return {"done": 1}
         
-        if self.proofData(): #If ical download is completed the server returns them
+        if self.proofData(): #If ical download is completed the server returns them, and if Data isn't empty
             data = [el[self._username] for el in WebsiteUntis.Data if self._username in el]
             WebsiteUntis.Data = [el for el in WebsiteUntis.Data if self._username not in el]
+            if data[0] == []:
+                return {"done": 2}
+                    
             return {"done":0, "Subjects":data[0]}
-
         else:
             return {"done": -1}
         
@@ -71,9 +73,6 @@ class WebsiteUntis:
         try:
             ical = Ical(self._filePath, self._fileName, self._profile)
             data = ical.getIcals()
-            if data == []:
-                self._setFilePath()
-                self._getIcals(Data, Processes)
                 
             print("Trueeeeeeeeeeee")
             Data.append({self._username : data})
